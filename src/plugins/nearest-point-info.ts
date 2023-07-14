@@ -23,6 +23,7 @@ export const nearestPointInfoPopupPlugin = (
 			color: black;
 			padding: 5px;
 			border: 1px solid black;
+			top: 0px;
 		}`;
 		chart.container.appendChild(this.data.styleTag);
 		this.data.hoverText.classList.add("crisislab-timeline-hover-text");
@@ -60,17 +61,15 @@ export const nearestPointInfoPopupPlugin = (
 				point.y,
 			)}
 ${chart.xLabel}: ${formatX(point.x)}`;
-			this.data.hoverText.style.top = rect.y + "px";
 			this.data.hoverText.style.display = "block";
 
 			if (chartX > chart.widthWithoutPadding / 2) {
 				// The -1 is to avoid a double border
-				this.data.hoverText.style.left =
-					rect.x + chart.leftPadding + "px";
+				this.data.hoverText.style.left = chart.leftPadding + "px";
+				this.data.hoverText.style.right = "unset";
 			} else {
-				// Don't need -1 here since clientWidth excludes borders
-				this.data.hoverText.style.left =
-					rect.right - this.data.hoverText.clientWidth - 1 + "px";
+				this.data.hoverText.style.left = "unset";
+				this.data.hoverText.style.right = "0px";
 			}
 		} else {
 			this.data.hoverText.style.display = "none";
