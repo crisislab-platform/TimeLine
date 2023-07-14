@@ -13,14 +13,19 @@ export const nearestPointInfoPopupPlugin = (
 ): TimeLinePlugin => ({
 	data: {
 		hoverText: document.createElement("div"),
+		styleTag: document.createElement("style"),
 	},
 	construct: function (chart) {
-		this.data.hoverText.style = `display: block;
-				position: absolute;
-				background-color: white;
-				color: black;
-				padding: 5px;
-				border: 1px solid black;`;
+		this.data.styleTag.innerText = `.crisislab-timeline-hover-text {
+			display: block;
+			position: absolute;
+			background-color: white;
+			color: black;
+			padding: 5px;
+			border: 1px solid black;
+		}`;
+		chart.container.appendChild(this.data.styleTag);
+		this.data.hoverText.classList.add("crisislab-timeline-hover-text");
 		chart.container.appendChild(this.data.hoverText);
 		window.addEventListener("mousemove", (event) => {
 			this.data.mouseX = event.pageX;
