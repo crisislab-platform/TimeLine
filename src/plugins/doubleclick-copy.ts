@@ -5,7 +5,7 @@ import { getNearestPoint, isPointInBox } from "../utils";
  * This plugin draws a marker on the nearest point to the mouse, when the mouse is over the canvas.
  * @returns {TimeLinePlugin}
  */
-export const doubleClickCopy = (): TimeLinePlugin => ({
+export const doubleClickCopyPlugin = (): TimeLinePlugin => ({
 	construct: function (chart) {
 		if ("clipboard" in navigator) {
 			chart.container.addEventListener("dblclick", (event) => {

@@ -5,7 +5,7 @@ import { getNearestPoint, isPointInBox } from "../utils";
  * This plugin draws a marker on the nearest point to the mouse, when the mouse is over the canvas.
  * @returns {TimeLinePlugin}
  */
-export const highlightNearestPoint = (): TimeLinePlugin => ({
+export const highlightNearestPointPlugin = (): TimeLinePlugin => ({
 	data: {
 		mouseX: -1,
 		mouseY: -1,

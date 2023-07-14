@@ -5,7 +5,7 @@ import { isPointInBox } from "../utils";
  * This plugin draws a crosshair when the mouse is on the canvas
  * @returns {TimeLinePlugin}
  */
-export const pointerCrossHair = (): TimeLinePlugin => ({
+export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
 	data: {
 		mouseX: -1,
 		mouseY: -1,
