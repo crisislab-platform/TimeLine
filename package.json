@@ -21,6 +21,11 @@
 		"type": "git",
 		"url": "https://github.com/rs-Web-Interface-CRISiSLab/TimeLine.git"
 	},
+	"homepage": "https://github.com/rs-Web-Interface-CRISiSLab/TimeLine",
+	"author": {
+		"name": "Zade Viggers",
+		"email": "zviggers@massey.ac.nz"
+	},
 	"types": "./dist/src/index.d.ts",
 	"main": "./dist/TimeLine.umd.cjs",
 	"module": "./dist/TimeLine.js",
