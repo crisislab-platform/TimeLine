@@ -32,7 +32,7 @@ Typescript definitions are included in the package.
 <summary>Basic live data</summary>
 
 ```ts
-import { TimeLine, Point, xAxisPlugin, yAxisPlugin } from "../../src";
+import { TimeLine, Point, xAxisPlugin, yAxisPlugin } from "@crisislab/timeline";
 
 const data: Point[] = [];
 const maxPoints = 300;
