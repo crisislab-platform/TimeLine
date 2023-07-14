@@ -5,7 +5,7 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
-		"publish": "npm run build && npm publish --access=public",
+		"deploy": "npm run build && npm publish --access=public",
 		"format": "prettier --write src/**/*"
 	},
 	"devDependencies": {
