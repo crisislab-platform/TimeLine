@@ -88,7 +88,7 @@ renderLoop();
 
 ### Plugins
 
-There are several plugins available:
+There are several plugins included:
 
 -   `xAxisPlugin`: Adds an x-axis
 -   `yAxisPlugin`: Adds an y-axis
