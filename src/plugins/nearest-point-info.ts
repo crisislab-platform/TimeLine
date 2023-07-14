@@ -3,8 +3,8 @@ import { getNearestPoint, isPointInBox } from "../utils";
 
 /**
  * This plugin shows an HTMl popup with info about the nearest point to the mouse.
- * @param formatX
- * @param formatY
+ * @param formatX A function to convert x-axis values into a human-readable format
+ * @param formatY A function to convert y-axis values into a human-readable format
  * @returns {TimeLinePlugin}
  */
 export const nearestPointInfoPopupPlugin = (
