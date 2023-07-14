@@ -7,6 +7,7 @@ import {
 	highlightNearestPointPlugin,
 	nearestPointInfoPopupPlugin,
 	pointerCrosshairPlugin,
+	axisLabelPlugin,
 } from "../../src";
 
 const data: Point[] = [];
@@ -26,6 +27,7 @@ const chart = new TimeLine({
 		highlightNearestPointPlugin(),
 		nearestPointInfoPopupPlugin(),
 		pointerCrosshairPlugin(),
+		axisLabelPlugin(),
 	],
 });
 
