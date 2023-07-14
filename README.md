@@ -90,8 +90,9 @@ renderLoop();
 
 There are several plugins included:
 
--   `xAxisPlugin`: Adds an x-axis
--   `yAxisPlugin`: Adds an y-axis
+-   `xAxisPlugin`: Adds an x-axis (but not an axis label)
+-   `yAxisPlugin`: Adds an y-axis (but not an axis label)
+-   `axisLabelPlugin`: Adds axis labels for the X and Y axis
 -   `pointerCrosshairPlugin`: Adds a crosshair that follows the mouse
 -   `highlightNearestPointPlugin`: Draws a marker on the nearest point to the mouse
 -   `doubleClickCopyPlugin`: Makes double clicking on the canvas copy the values of the nearest point in tsv (csv) format to the clipboard

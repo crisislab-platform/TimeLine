@@ -1,5 +1,4 @@
 import { TimeLinePlugin } from "../types";
-import { getNearestPoint, isPointInBox } from "../utils";
 
 /**
  * This plugin adds text labels to the X and Y axis.
