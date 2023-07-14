@@ -22,7 +22,7 @@ export interface TimeLineOptions {
 	yLabel: string;
 	xLabel: string;
 	lineWidth?: number;
-	plugins?: TimeLinePlugin[];
+	plugins?: (TimeLinePlugin | null | undefined | false)[];
 }
 
 type TimeLinePluginHook = (chart: TimeLine) => void;

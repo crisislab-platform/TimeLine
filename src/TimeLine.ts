@@ -28,7 +28,7 @@ export class TimeLine {
 
 	foregroundColour = "black";
 	backgroundColour = "white";
-	plugins: (TimeLinePlugin | null | undefined | false)[];
+	plugins: TimeLinePlugin[];
 
 	constructor(options: TimeLineOptions) {
 		this.container = options.container;
@@ -37,7 +37,10 @@ export class TimeLine {
 		this.pointGap = options.pointGap;
 		this.xLabel = options.xLabel;
 		this.yLabel = options.yLabel;
-		this.plugins = options.plugins?.filter((plugin) => !!plugin) || [];
+		this.plugins =
+			(options.plugins?.filter(
+				(plugin) => !!plugin,
+			) as TimeLinePlugin[]) || [];
 
 		if (options.lineWidth) this.lineWidth = options.lineWidth;
 
@@ -79,7 +82,6 @@ export class TimeLine {
 	private handlePluginHooks(hook: keyof TimeLinePlugin) {
 		// Call all plugins with that hook defined
 		for (const plugin of this.plugins) {
-			if (!plugin) continue;
 			plugin?.[hook]?.(this);
 		}
 	}
