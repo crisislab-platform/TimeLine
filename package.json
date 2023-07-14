@@ -1,9 +1,10 @@
 {
 	"name": "@crisislab/timeline",
-	"version": "1.0.0",
+	"version": "0.2.0",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"publish": "npm run build && npm publish --access=public",
 		"format": "prettier --write src/**/*"
 	},
 	"devDependencies": {
