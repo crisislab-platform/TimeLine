@@ -111,7 +111,7 @@ export class TimeLine {
 		this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 	}
 
-	get widthWithPadding() {
+	get widthWithoutPadding() {
 		return this.width - this.leftPadding;
 	}
 
@@ -119,7 +119,7 @@ export class TimeLine {
 		return this.canvas.width / window.devicePixelRatio;
 	}
 
-	get heightWithPadding() {
+	get heightWithoutPadding() {
 		return this.height - this.bottomPadding;
 	}
 
@@ -137,7 +137,7 @@ export class TimeLine {
 
 		// X multiplier is easy - just use the number of points and their width
 		const xMultiplier =
-			this.widthWithPadding / (this.maxPoints * this.pointGap);
+			this.widthWithoutPadding / (this.maxPoints * this.pointGap);
 
 		// X offset is
 		const xOffset =
@@ -157,7 +157,7 @@ export class TimeLine {
 		const maxYGap = biggestYValue - smallestYValue;
 
 		// Now divide the available pixels by that
-		const yMultiplier = this.heightWithPadding / maxYGap;
+		const yMultiplier = this.heightWithoutPadding / maxYGap;
 
 		// Also calculate what we need to add to all the Y values so that they're visible
 		const yOffset = -smallestYValue;
@@ -200,7 +200,8 @@ export class TimeLine {
 				...point,
 				renderX: this.leftPadding + (point.x + xOffset) * xMultiplier,
 				renderY:
-					this.heightWithPadding - (point.y + yOffset) * yMultiplier,
+					this.heightWithoutPadding -
+					(point.y + yOffset) * yMultiplier,
 			};
 			this.computedData.push(computedPoint);
 		}
@@ -228,8 +229,8 @@ export class TimeLine {
 		this.ctx.strokeRect(
 			this.leftPadding,
 			0,
-			this.widthWithPadding,
-			this.heightWithPadding,
+			this.widthWithoutPadding,
+			this.heightWithoutPadding,
 		);
 
 		// Begin the path

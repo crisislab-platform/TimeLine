@@ -28,14 +28,14 @@ export const xAxisPlugin = (
 
 			const label = formatLabel(point.x);
 			const textX = point.renderX + 5;
-			const textY = chart.heightWithPadding + axisPadding;
+			const textY = chart.heightWithoutPadding + axisPadding;
 
 			// Marker
 			chart.ctx.beginPath();
-			chart.ctx.moveTo(point.renderX, chart.heightWithPadding);
+			chart.ctx.moveTo(point.renderX, chart.heightWithoutPadding);
 			chart.ctx.lineTo(
 				point.renderX,
-				chart.heightWithPadding + tickLength,
+				chart.heightWithoutPadding + tickLength,
 			);
 			chart.ctx.stroke();
 
@@ -63,9 +63,9 @@ export const yAxisPlugin = (
 		chart.ctx.fillStyle = chart.foregroundColour;
 
 		for (let i = 0; i < yMarks; i++) {
-			const yValue = (i * chart.heightWithPadding) / (yMarks - 1);
+			const yValue = (i * chart.heightWithoutPadding) / (yMarks - 1);
 			const yDataValue =
-				(chart.heightWithPadding - yValue) / yMultiplier - yOffset;
+				(chart.heightWithoutPadding - yValue) / yMultiplier - yOffset;
 
 			const textX = chart.leftPadding - axisPadding;
 			const textY = yValue + axisPadding; // Move down so it doesn't overlap the line
