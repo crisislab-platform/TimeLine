@@ -49,9 +49,7 @@ const chart = new TimeLine({
 		// By default, the chart doesn't draw an x or y axis.
 		// You can use these built-in plugins though.
 		xAxisPlugin((x) => new Date(x).toLocaleTimeString()),
-		yAxisPlugin(),
-		// Also these plugins don't label the axis they generate.
-		// You have to do that yourself in HTML.
+		axisLabelPlugin(),
 	],
 });
 
