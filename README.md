@@ -4,6 +4,8 @@ TimeLine is the dependency-free Typescript time-series web graphing library deve
 
 We use TimeLine in production [here](https://shakemap.crisislab.org.nz/).
 
+However, this library is designed for one use-case: rendering live seismograph data. It might not be ideal for your use-case. You should also check out [huww98/TimeChart](https://github.com/huww98/TimeChart).
+
 ## Usage
 
 ### Installation
@@ -16,12 +18,13 @@ Typescript definitions are included in the package.
 
 ### Important notes!
 
--   `data` should be sorted by x-value, with smallest values first
+-   `data` should be sorted by x-value, with smallest values first. If you always add new data onto the end, this shouldn't be a problem.
 -   Make sure that the `data` array you give to the chart isn't longer than `maxLength`
 -   `pointGap` should be the distance you expect your points to be separated by. Currently you get weird issues if there are longer gaps - I'm looking into fixing this.
 -   Call `chart.recompute()` whenever you've updated the data array. You can also use this to batch changes by waiting until you're done modifying `data` before recomputing.
 -   The chart won't compute or draw anything if there are less than two points.
 -   The chart doesn't automatically draw itself. You have to call `chart.draw()`. Note: calling `chart.recompute()` won't re-draw the chart
+-   `chart.draw()` doesn't recompute any data, so if you never call `chart.recompute()`, adding new points to `data` won't show up.
 
 ### Examples
 
