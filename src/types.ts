@@ -34,4 +34,5 @@ export interface TimeLinePlugin {
 	construct?: TimeLinePluginHook;
 	pause?: TimeLinePluginHook;
 	resume?: TimeLinePluginHook;
+	data?: any;
 }

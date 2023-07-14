@@ -41,6 +41,9 @@ export class TimeLine {
 
 		if (options.lineWidth) this.lineWidth = options.lineWidth;
 
+		// Very important for axis labels
+		this.container.style.position = "relative";
+
 		// Setup canvas
 		this.canvas = document.createElement("canvas");
 		this.canvas.style.width = "100%";

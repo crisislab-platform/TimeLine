@@ -78,13 +78,23 @@ setInterval(() => {
 
 // Note that you need to call chart.draw() yourself
 function renderLoop() {
-	chart.draw();
 	requestAnimationFrame(renderLoop);
+	chart.draw();
 }
 renderLoop();
 ```
 
 </details>
+
+### Plugins
+
+There are several plugins included:
+
+-   `xAxisPlugin`: Adds an x-axis
+-   `yAxisPlugin`: Adds an y-axis
+-   `pointerCrosshairPlugin`: Adds a crosshair that follows the mouse
+-   `highlightNearestPointPlugin`: Draws a marker on the nearest point to the mouse
+-   `doubleClickCopyPlugin`: Makes double clicking on the canvas copy the values of the nearest point in tsv (csv) format to the clipboard
 
 ## Credit
 

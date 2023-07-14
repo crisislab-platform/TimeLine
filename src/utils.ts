@@ -30,3 +30,14 @@ export function getNearestPoint(
 
 	return closestDataPoint;
 }
+
+export function isPointInBox(
+	px: number,
+	py: number,
+	x: number,
+	y: number,
+	w: number,
+	h: number,
+): boolean {
+	return x <= px && px <= x + w && y <= py && py <= y + h;
+}
