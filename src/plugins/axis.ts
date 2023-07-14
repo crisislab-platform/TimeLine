@@ -1,4 +1,4 @@
-import { TimeLinePlugin } from "./types";
+import { TimeLinePlugin } from "../types";
 
 // Consistency
 const labelFontSize = 12;
@@ -6,6 +6,12 @@ const axisPadding = 4;
 const tickLength = 18;
 const labelFont = `${labelFontSize}px Arial`;
 
+/**
+ * This plugin draws an x-axis on the chart.
+ * @param formatLabel A function that converts an x-axis value to a human-readable format
+ * @param xMarks The number of markers to show on the x-axis
+ * @returns {TimeLinePlugin}
+ */
 export const xAxisPlugin = (
 	formatLabel: (x: number) => string = (x) => x + "",
 	xMarks = 5,
@@ -45,6 +51,12 @@ export const xAxisPlugin = (
 	},
 });
 
+/**
+ * This plugin draws a y-axis on the chart.
+ * @param formatLabel A function that converts an y-axis value to a human-readable format
+ * @param yMarks The number of markers to show on the y-axis
+ * @returns {TimeLinePlugin}
+ */
 export const yAxisPlugin = (
 	formatLabel: (y: number) => string = (y) => y + "",
 	yMarks = 5,
