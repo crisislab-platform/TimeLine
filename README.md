@@ -1,6 +1,6 @@
 # TimeLine
 
-TimeLine is the dependency-free Typescript time-series web graphing library developed in-house at [CRISiSLab](https://www.crisislab.org.nz/).
+TimeLine is the dependency-free Typescript time-series web realtime graphing library developed in-house at [CRISiSLab](https://www.crisislab.org.nz/).
 
 We use TimeLine in production [here](https://shakemap.crisislab.org.nz/).
 
