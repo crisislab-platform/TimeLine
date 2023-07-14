@@ -17,7 +17,7 @@ export const xAxisPlugin = (
 	xMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
-		chart.bottomPadding = 30;
+		chart.bottomPadding += 30;
 	},
 	"draw:after": (chart) => {
 		// Set font properties
@@ -62,7 +62,7 @@ export const yAxisPlugin = (
 	yMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
-		chart.leftPadding = 60;
+		chart.leftPadding += 60;
 	},
 	"draw:after": (chart) => {
 		const { yOffset, yMultiplier } = chart.getRenderOffsetsAndMultipliers();
