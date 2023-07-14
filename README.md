@@ -86,6 +86,16 @@ renderLoop();
 
 </details>
 
+### Plugins
+
+There are several plugins available:
+
+-   `xAxisPlugin`: Adds an x-axis
+-   `yAxisPlugin`: Adds an y-axis
+-   `pointerCrosshairPlugin`: Adds a crosshair that follows the mouse
+-   `highlightNearestPointPlugin`: Draws a marker on the nearest point to the mouse
+-   `doubleClickCopyPlugin`: Makes double clicking on the canvas copy the values of the nearest point in tsv (csv) format to the clipboard
+
 ## Credit
 
 This project was inspired by [TimeChart](https://github.com/huww98/TimeChart) by [huww98](https://github.com/huww98). We were originally using huww98's library, but found that webGL was excessive for our needs, and created too many problems to justify continuing to use it. Our library's API design is inspired by huww98's library, and the visuals are similar, but under the hood it's completly different. Our library uses the [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API) instead of [WebGL](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API) for rendering, so it won't be as performant for huge amounts of data.
