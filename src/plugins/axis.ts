@@ -62,7 +62,7 @@ export const yAxisPlugin = (
 	yMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
-		chart.leftPadding += 60;
+		chart.leftPadding += 40;
 	},
 	"draw:after": (chart) => {
 		const { yOffset, yMultiplier } = chart.getRenderOffsetsAndMultipliers();
