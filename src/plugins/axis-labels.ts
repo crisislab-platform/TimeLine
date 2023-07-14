@@ -11,7 +11,7 @@ export const axisLabelPlugin = (): TimeLinePlugin => ({
 		styleTag: document.createElement("style"),
 	},
 	construct: function (chart) {
-		chart.leftPadding += 15;
+		chart.leftPadding += 20;
 		chart.bottomPadding += 10;
 
 		this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
@@ -33,7 +33,7 @@ export const axisLabelPlugin = (): TimeLinePlugin => ({
 				top: 50%;
 				writing-mode: vertical-rl;
 				transform: rotate(180deg) translateY(50%);
-				margin-left: 2px;
+				margin-left: 1px;
 			}`;
 		chart.container.appendChild(this.data.styleTag);
 
