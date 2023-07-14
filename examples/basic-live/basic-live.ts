@@ -44,7 +44,7 @@ setInterval(() => {
 
 // Note that you need to call chart.draw() yourself
 function renderLoop() {
-	chart.draw();
 	requestAnimationFrame(renderLoop);
+	chart.draw();
 }
 renderLoop();
