@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 devDependencies:
   prettier:
     specifier: ^3.0.0
@@ -8,8 +12,8 @@ devDependencies:
     specifier: ^5.1.6
     version: 5.1.6
   vite:
-    specifier: ^4.4.3
-    version: 4.4.3
+    specifier: ^4.4.4
+    version: 4.4.4
   vite-plugin-dts:
     specifier: ^3.2.0
     version: 3.2.0(typescript@5.1.6)
@@ -764,7 +768,7 @@ packages:
       vue-tsc: 1.8.4(typescript@5.1.6)
     optionalDependencies:
       rollup: 3.26.2
-      vite: 4.4.3
+      vite: 4.4.4
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -776,8 +780,8 @@ packages:
       - terser
     dev: true
 
-  /vite@4.4.3:
-    resolution: {integrity: sha512-IMnXQXXWgLi5brBQx/4WzDxdzW0X3pjO4nqFJAuNvwKtxzAmPzFE1wszW3VDpAGQJm3RZkm/brzRdyGsnwgJIA==}
+  /vite@4.4.4:
+    resolution: {integrity: sha512-4mvsTxjkveWrKDJI70QmelfVqTm+ihFAb6+xf4sjEU2TmUCTlVX87tmg/QooPEMQb/lM9qGHT99ebqPziEd3wg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
     peerDependencies:
