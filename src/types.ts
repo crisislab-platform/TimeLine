@@ -18,7 +18,7 @@ export interface TimeLineOptions {
 	container: HTMLElement;
 	data: TimeLineDataPoint[];
 	maxPoints: number;
-	pointWidth: number;
+	pointGap: number;
 	yLabel: string;
 	xLabel: string;
 	lineWidth?: number;

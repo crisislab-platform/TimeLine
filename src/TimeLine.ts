@@ -1,6 +1,5 @@
 import type {
 	ComputedTimeLineDataPoint,
-	Point,
 	TimeLineDataPoint,
 	TimeLineOptions,
 	TimeLinePlugin,
@@ -19,7 +18,7 @@ export class TimeLine {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
 	maxPoints: number;
-	pointWidth: number;
+	pointGap: number;
 	yLabel: string;
 	xLabel: string;
 	lineWidth = 0.8;
@@ -35,7 +34,7 @@ export class TimeLine {
 		this.container = options.container;
 		this.data = options.data;
 		this.maxPoints = options.maxPoints;
-		this.pointWidth = options.pointWidth;
+		this.pointGap = options.pointGap;
 		this.xLabel = options.xLabel;
 		this.yLabel = options.yLabel;
 		this.plugins = options.plugins || [];
@@ -138,11 +137,11 @@ export class TimeLine {
 
 		// X multiplier is easy - just use the number of points and their width
 		const xMultiplier =
-			this.widthWithPadding / (this.maxPoints * this.pointWidth);
+			this.widthWithPadding / (this.maxPoints * this.pointGap);
 
 		// X offset is
 		const xOffset =
-			(this.maxPoints - this.savedData.length) * this.pointWidth -
+			(this.maxPoints - this.savedData.length) * this.pointGap -
 			this.savedData[0].x;
 
 		// Y is harder - need to find the difference between the minimum and maximum points
