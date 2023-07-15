@@ -42,7 +42,7 @@ export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
 			if (chartY < chart.heightWithoutPadding) {
 				chart.ctx.beginPath();
 				chart.ctx.moveTo(chart.leftPadding, chartY);
-				chart.ctx.lineTo(chart.widthWithoutPadding, chartY);
+				chart.ctx.lineTo(chart.width, chartY);
 				chart.ctx.stroke();
 			}
 
