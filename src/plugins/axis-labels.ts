@@ -17,10 +17,10 @@ export const axisLabelPlugin = (
 	},
 	construct: function (chart) {
 		if (showY) {
-			chart.leftPadding += 20;
+			chart.padding.left += 20;
 		}
 		if (showX) {
-			chart.bottomPadding += 10;
+			chart.padding.bottom += 10;
 		}
 
 		this.data.styleTag.innerText = `.crisislab-timeline-axis-label {

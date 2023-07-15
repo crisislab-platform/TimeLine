@@ -4,6 +4,13 @@ import type {
 	TimeLinePlugin,
 } from "./types";
 
+interface TimeLinePadding {
+	left: number;
+	right: number;
+	top: number;
+	bottom: number;
+}
+
 export interface TimeLineOptions {
 	container: HTMLElement;
 	data: TimeLineDataPoint[];
@@ -11,6 +18,7 @@ export interface TimeLineOptions {
 	yLabel: string;
 	xLabel: string;
 	lineWidth?: number;
+	padding?: Partial<TimeLinePadding>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
 }
 
@@ -31,8 +39,7 @@ export class TimeLine {
 	xLabel: string;
 	lineWidth = 0.8;
 	paused = false;
-	leftPadding = 0;
-	bottomPadding = 0;
+	padding: TimeLinePadding;
 
 	foregroundColour = "black";
 	backgroundColour = "white";
@@ -44,6 +51,14 @@ export class TimeLine {
 		this.maxPoints = options.maxPoints;
 		this.xLabel = options.xLabel;
 		this.yLabel = options.yLabel;
+		this.padding = {
+			left: 0,
+			right: 0,
+			top: 0,
+			bottom: 0,
+			...options.padding,
+		};
+
 		this.plugins =
 			(options.plugins?.filter(
 				(plugin) => !!plugin,
@@ -124,16 +139,16 @@ export class TimeLine {
 		this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 	}
 
-	get widthWithoutPadding() {
-		return this.width - this.leftPadding;
+	get widthInsidePadding() {
+		return this.width - this.padding.left - this.padding.right;
 	}
 
 	get width() {
 		return this.canvas.width / window.devicePixelRatio;
 	}
 
-	get heightWithoutPadding() {
-		return this.height - this.bottomPadding;
+	get heightInsidePadding() {
+		return this.height - this.padding.bottom - this.padding.top;
 	}
 
 	get height() {
@@ -174,7 +189,7 @@ export class TimeLine {
 
 		// Calculate the X multiplier so that the data all fits in the pane
 		const xMultiplier =
-			this.widthWithoutPadding / (this.maxPoints * averageSpacePerPoint);
+			this.widthInsidePadding / (this.maxPoints * averageSpacePerPoint);
 
 		// Calculate the X-offset so that all data is visible
 		// & initially the graph scrolls from the right.
@@ -195,7 +210,7 @@ export class TimeLine {
 		const maxYGap = biggestYValue - smallestYValue;
 
 		// Now divide the available pixels by that for the multiplier
-		const yMultiplier = this.heightWithoutPadding / maxYGap;
+		const yMultiplier = this.heightInsidePadding / maxYGap;
 
 		// Y offset is very easy - just the inverse of the smallest number
 		// since we draw from the top
@@ -237,9 +252,10 @@ export class TimeLine {
 		for (const point of this.savedData) {
 			const computedPoint: ComputedTimeLineDataPoint = {
 				...point,
-				renderX: this.leftPadding + (point.x + xOffset) * xMultiplier,
+				renderX: this.padding.left + (point.x + xOffset) * xMultiplier,
 				renderY:
-					this.heightWithoutPadding -
+					this.padding.top +
+					this.heightInsidePadding -
 					(point.y + yOffset) * yMultiplier,
 			};
 			this.computedData.push(computedPoint);
@@ -266,10 +282,10 @@ export class TimeLine {
 
 		// Draw lines on sides
 		this.ctx.strokeRect(
-			this.leftPadding,
-			0,
-			this.widthWithoutPadding,
-			this.heightWithoutPadding,
+			this.padding.left,
+			this.padding.top,
+			this.widthInsidePadding,
+			this.heightInsidePadding,
 		);
 
 		// Begin the path

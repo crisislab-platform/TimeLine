@@ -12,8 +12,8 @@ export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
 	},
 	construct: function (chart) {
 		window.addEventListener("mousemove", (event) => {
-			this.data.mouseX = event.pageX;
-			this.data.mouseY = event.pageY;
+			this.data.mouseX = event.clientX;
+			this.data.mouseY = event.clientY;
 		});
 	},
 	"draw:after": function (chart) {
@@ -39,18 +39,24 @@ export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
 			chart.ctx.setLineDash([10, 10]);
 
 			// Horizontal line
-			if (chartY < chart.heightWithoutPadding) {
+			if (
+				chartY > chart.padding.top &&
+				chartY < chart.height - chart.padding.bottom
+			) {
 				chart.ctx.beginPath();
-				chart.ctx.moveTo(chart.leftPadding, chartY);
-				chart.ctx.lineTo(chart.width, chartY);
+				chart.ctx.moveTo(chart.padding.left, chartY);
+				chart.ctx.lineTo(chart.width - chart.padding.right, chartY);
 				chart.ctx.stroke();
 			}
 
 			// Vertical line
-			if (chartX > chart.leftPadding) {
+			if (
+				chartX > chart.padding.left &&
+				chartX < chart.width - chart.padding.right
+			) {
 				chart.ctx.beginPath();
-				chart.ctx.moveTo(chartX, 0);
-				chart.ctx.lineTo(chartX, chart.heightWithoutPadding);
+				chart.ctx.moveTo(chartX, chart.padding.top);
+				chart.ctx.lineTo(chartX, chart.height - chart.padding.bottom);
 				chart.ctx.stroke();
 			}
 		}

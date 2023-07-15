@@ -13,8 +13,8 @@ export const doubleClickCopyPlugin = (): TimeLinePlugin => ({
 				const rect = chart.canvas.getBoundingClientRect();
 
 				const point = getNearestPoint(chart, {
-					x: event.pageX - rect.x,
-					y: event.pageY - rect.y,
+					x: event.clientX - rect.x,
+					y: event.clientY - rect.y,
 				});
 				if (!point) return;
 				try {

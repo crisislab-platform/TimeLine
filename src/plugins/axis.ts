@@ -2,7 +2,7 @@ import { TimeLinePlugin } from "../types";
 
 // Consistency
 const labelFontSize = 12;
-const axisPadding = 4;
+const axisGap = 4;
 const tickLength = 18;
 const labelFont = `${labelFontSize}px Arial`;
 
@@ -17,7 +17,7 @@ export const xAxisPlugin = (
 	xMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
-		chart.bottomPadding += 30;
+		chart.padding.bottom += 30;
 	},
 	"draw:after": (chart) => {
 		// Set font properties
@@ -31,18 +31,16 @@ export const xAxisPlugin = (
 		for (let i = 0; i < xMarks; i++) {
 			const point = chart.computedData[i * xPointGap];
 			if (!point) continue;
+			const renderY = chart.height - chart.padding.bottom;
 
 			const label = formatLabel(point.x);
 			const textX = point.renderX + 5;
-			const textY = chart.heightWithoutPadding + axisPadding;
+			const textY = renderY + axisGap;
 
 			// Marker
 			chart.ctx.beginPath();
-			chart.ctx.moveTo(point.renderX, chart.heightWithoutPadding);
-			chart.ctx.lineTo(
-				point.renderX,
-				chart.heightWithoutPadding + tickLength,
-			);
+			chart.ctx.moveTo(point.renderX, renderY);
+			chart.ctx.lineTo(point.renderX, renderY + tickLength);
 			chart.ctx.stroke();
 
 			// Label
@@ -62,7 +60,7 @@ export const yAxisPlugin = (
 	yMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
-		chart.leftPadding += 40;
+		chart.padding.left += 40;
 	},
 	"draw:after": (chart) => {
 		const { yOffset, yMultiplier } = chart.getRenderOffsetsAndMultipliers();
@@ -75,18 +73,19 @@ export const yAxisPlugin = (
 		chart.ctx.fillStyle = chart.foregroundColour;
 
 		for (let i = 0; i < yMarks; i++) {
-			const yValue = (i * chart.heightWithoutPadding) / (yMarks - 1);
+			const yValue = (i * chart.heightInsidePadding) / (yMarks - 1);
+			const yRenderPosition = yValue + chart.padding.top;
 			const yDataValue =
-				(chart.heightWithoutPadding - yValue) / yMultiplier - yOffset;
+				(chart.heightInsidePadding - yValue) / yMultiplier - yOffset;
 
-			const textX = chart.leftPadding - axisPadding;
-			const textY = yValue + axisPadding; // Move down so it doesn't overlap the line
+			const textX = chart.padding.left - axisGap;
+			const textY = yRenderPosition + axisGap; // Move down so it doesn't overlap the line
 			const label = formatLabel(yDataValue);
 
 			//Marker
 			chart.ctx.beginPath();
-			chart.ctx.moveTo(chart.leftPadding - tickLength, yValue);
-			chart.ctx.lineTo(chart.leftPadding, yValue);
+			chart.ctx.moveTo(chart.padding.left - tickLength, yRenderPosition);
+			chart.ctx.lineTo(chart.padding.left, yRenderPosition);
 			chart.ctx.stroke();
 
 			// Label

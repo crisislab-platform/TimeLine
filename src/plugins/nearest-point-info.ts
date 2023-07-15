@@ -29,8 +29,8 @@ export const nearestPointInfoPopupPlugin = (
 		this.data.hoverText.classList.add("crisislab-timeline-hover-text");
 		chart.container.appendChild(this.data.hoverText);
 		window.addEventListener("mousemove", (event) => {
-			this.data.mouseX = event.pageX;
-			this.data.mouseY = event.pageY;
+			this.data.mouseX = event.clientX;
+			this.data.mouseY = event.clientY;
 		});
 	},
 	"draw:after": function (chart) {
@@ -63,13 +63,17 @@ export const nearestPointInfoPopupPlugin = (
 ${chart.xLabel}: ${formatX(point.x)}`;
 			this.data.hoverText.style.display = "block";
 
-			if (chartX > chart.widthWithoutPadding / 2) {
+			// Vertical positioning
+			this.data.hoverText.style.top = chart.padding.top + "px";
+
+			// Horizontal positioning
+			if (chartX > chart.widthInsidePadding / 2) {
 				// The -1 is to avoid a double border
-				this.data.hoverText.style.left = chart.leftPadding + "px";
+				this.data.hoverText.style.left = chart.padding.left + "px";
 				this.data.hoverText.style.right = "unset";
 			} else {
 				this.data.hoverText.style.left = "unset";
-				this.data.hoverText.style.right = "0px";
+				this.data.hoverText.style.right = chart.padding.right + "px";
 			}
 		} else {
 			this.data.hoverText.style.display = "none";

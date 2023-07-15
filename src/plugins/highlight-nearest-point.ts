@@ -12,8 +12,8 @@ export const highlightNearestPointPlugin = (): TimeLinePlugin => ({
 	},
 	construct: function () {
 		window.addEventListener("mousemove", (event) => {
-			this.data.mouseX = event.pageX;
-			this.data.mouseY = event.pageY;
+			this.data.mouseX = event.clientX;
+			this.data.mouseY = event.clientY;
 		});
 	},
 	"draw:after": function (chart) {
