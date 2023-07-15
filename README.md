@@ -32,16 +32,19 @@ Typescript definitions are included in the package.
 <summary>Basic live data</summary>
 
 ```ts
-import { TimeLine, Point, xAxisPlugin, yAxisPlugin } from "@crisislab/timeline";
+import {
+	TimeLine,
+	Point,
+	xAxisPlugin,
+	axisLabelPlugin,
+} from "@crisislab/timeline";
 
 const data: Point[] = [];
 const maxPoints = 300;
-const pointGap = 50;
 const chart = new TimeLine({
 	container: document.getElementById("chart-container") as HTMLElement,
 	data,
 	maxPoints,
-	pointGap,
 	// Note that these aren't used by the chart itself, they're just used by plugins
 	xLabel: "Time",
 	yLabel: "Random numbers",
@@ -72,7 +75,7 @@ setInterval(() => {
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
-}, pointGap);
+}, 50);
 
 // Note that you need to call chart.draw() yourself
 function renderLoop() {
@@ -83,6 +86,8 @@ renderLoop();
 ```
 
 </details>
+
+More examples in the [examples folder](./examples/).
 
 ### Plugins
 

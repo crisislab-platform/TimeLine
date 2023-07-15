@@ -1,9 +1,18 @@
 import type {
 	ComputedTimeLineDataPoint,
 	TimeLineDataPoint,
-	TimeLineOptions,
 	TimeLinePlugin,
 } from "./types";
+
+export interface TimeLineOptions {
+	container: HTMLElement;
+	data: TimeLineDataPoint[];
+	maxPoints: number;
+	yLabel: string;
+	xLabel: string;
+	lineWidth?: number;
+	plugins?: (TimeLinePlugin | null | undefined | false)[];
+}
 
 // NOTE: Assumes data is sorted by X value, with smallest value first in the list
 export class TimeLine {
@@ -18,7 +27,6 @@ export class TimeLine {
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
 	maxPoints: number;
-	pointGap: number;
 	yLabel: string;
 	xLabel: string;
 	lineWidth = 0.8;
@@ -34,7 +42,6 @@ export class TimeLine {
 		this.container = options.container;
 		this.data = options.data;
 		this.maxPoints = options.maxPoints;
-		this.pointGap = options.pointGap;
 		this.xLabel = options.xLabel;
 		this.yLabel = options.yLabel;
 		this.plugins =
@@ -139,18 +146,43 @@ export class TimeLine {
 		yOffset: number;
 		yMultiplier: number;
 	} {
+		// Avoid throwing errors dividing by zero
+		if (this.savedData.length < 2) {
+			return {
+				xOffset: 0,
+				xMultiplier: 1,
+				yOffset: 0,
+				yMultiplier: 1,
+			};
+		}
+
 		// Calculate X and Y multipliers
 
-		// X multiplier is easy - just use the number of points and their width
-		const xMultiplier =
-			this.widthWithoutPadding / (this.maxPoints * this.pointGap);
+		// For X, we need to first figure out the total amount of space used by the points
+		let totalPointWidth = 0;
+		for (let i = 1; i < this.savedData.length; i++) {
+			// Calculate the gap between this point & the previous point
+			const previousPoint = this.savedData[i - 1];
+			const currentPoint = this.savedData[i];
+			const gap = currentPoint.x - previousPoint.x;
 
-		// X offset is
+			totalPointWidth += gap;
+		}
+
+		// This is what the pointGap would be if all the points were perfectly spaced
+		const averageSpacePerPoint = totalPointWidth / this.savedData.length;
+
+		// Calculate the X multiplier so that the data all fits in the pane
+		const xMultiplier =
+			this.widthWithoutPadding / (this.maxPoints * averageSpacePerPoint);
+
+		// Calculate the X-offset so that all data is visible
+		// & initially the graph scrolls from the right.
 		const xOffset =
-			(this.maxPoints - this.savedData.length) * this.pointGap -
+			(this.maxPoints - this.savedData.length) * averageSpacePerPoint -
 			this.savedData[0].x;
 
-		// Y is harder - need to find the difference between the minimum and maximum points
+		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 		// Note to future self: Always use -Infinity, not Number.MIN_VALUE
 		let biggestYValue = -Infinity;
 		let smallestYValue = Infinity;
@@ -162,10 +194,11 @@ export class TimeLine {
 		// Get the maximum gap
 		const maxYGap = biggestYValue - smallestYValue;
 
-		// Now divide the available pixels by that
+		// Now divide the available pixels by that for the multiplier
 		const yMultiplier = this.heightWithoutPadding / maxYGap;
 
-		// Also calculate what we need to add to all the Y values so that they're visible
+		// Y offset is very easy - just the inverse of the smallest number
+		// since we draw from the top
 		const yOffset = -smallestYValue;
 
 		return {

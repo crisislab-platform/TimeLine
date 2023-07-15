@@ -14,17 +14,6 @@ export interface ComputedTimeLineDataPoint extends TimeLineDataPoint {
 	renderY: number;
 }
 
-export interface TimeLineOptions {
-	container: HTMLElement;
-	data: TimeLineDataPoint[];
-	maxPoints: number;
-	pointGap: number;
-	yLabel: string;
-	xLabel: string;
-	lineWidth?: number;
-	plugins?: (TimeLinePlugin | null | undefined | false)[];
-}
-
 type TimeLinePluginHook = (chart: TimeLine) => void;
 export interface TimeLinePlugin {
 	"draw:before"?: TimeLinePluginHook;

@@ -30,7 +30,9 @@ const chart = new TimeLine({
 });
 
 let prev = 0;
-setInterval(() => {
+function addPoint() {
+	setTimeout(addPoint, Math.random() * 50);
+
 	const y =
 		prev + Math.floor(Math.random() * 10) * (Math.random() > 0.5 ? -1 : 1);
 	prev = y;
@@ -48,7 +50,8 @@ setInterval(() => {
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
-}, 50);
+}
+addPoint();
 
 // Note that you need to call chart.draw() yourself
 function renderLoop() {
