@@ -1,15 +1,17 @@
-import { TimeLinePlugin } from "../types";
-import { getNearestPoint, isPointInBox } from "../utils";
+import { DistanceMethod, TimeLinePlugin } from "../types";
+import { getNearestPoint } from "../utils";
 
 /**
  * This plugin shows an HTMl popup with info about the nearest point to the mouse.
  * @param formatX A function to convert x-axis values into a human-readable format
  * @param formatY A function to convert y-axis values into a human-readable format
+ * @param distanceMethod The method by which to get the distance to points from the cursor
  * @returns {TimeLinePlugin}
  */
 export const nearestPointInfoPopupPlugin = (
 	formatX: (x: number) => string = (x) => x + "",
-	formatY: (x: number) => string = (x) => x + "",
+	formatY: (y: number) => string = (y) => y + "",
+	distanceMethod?: DistanceMethod,
 ): TimeLinePlugin => ({
 	data: {
 		hoverText: document.createElement("div"),
@@ -33,10 +35,14 @@ export const nearestPointInfoPopupPlugin = (
 		// Check if the mouse is over the chart
 		if (chart.helpfulInfo.cursor.overChart) {
 			// Get the nearest point
-			const point = getNearestPoint(chart, {
-				x: chart.helpfulInfo.cursor.chartX,
-				y: chart.helpfulInfo.cursor.chartY,
-			});
+			const point = getNearestPoint(
+				chart,
+				{
+					x: chart.helpfulInfo.cursor.chartX,
+					y: chart.helpfulInfo.cursor.chartY,
+				},
+				distanceMethod,
+			);
 			if (!point) {
 				this.data.hoverText.style.display = "none";
 				return;

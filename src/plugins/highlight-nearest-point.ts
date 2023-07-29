@@ -1,29 +1,26 @@
-import { TimeLinePlugin } from "../types";
-import { getNearestPoint, isPointInBox } from "../utils";
+import { DistanceMethod, TimeLinePlugin } from "../types";
+import { getNearestPoint } from "../utils";
 
 /**
  * This plugin draws a marker on the nearest point to the mouse, when the mouse is over the canvas.
+ * @param distanceMethod The method by which to get the distance to points from the cursor
  * @returns {TimeLinePlugin}
  */
-export const highlightNearestPointPlugin = (): TimeLinePlugin => ({
-	data: {
-		mouseX: -1,
-		mouseY: -1,
-	},
-	construct: function () {
-		window.addEventListener("mousemove", (event) => {
-			this.data.mouseX = event.clientX;
-			this.data.mouseY = event.clientY;
-		});
-	},
+export const highlightNearestPointPlugin = (
+	distanceMethod?: DistanceMethod,
+): TimeLinePlugin => ({
 	"draw:after": function (chart) {
 		// Check if the mouse is over the chart
 		if (chart.helpfulInfo.cursor.overChart) {
 			// Get the nearest point
-			const point = getNearestPoint(chart, {
-				x: chart.helpfulInfo.cursor.chartX,
-				y: chart.helpfulInfo.cursor.chartY,
-			});
+			const point = getNearestPoint(
+				chart,
+				{
+					x: chart.helpfulInfo.cursor.chartX,
+					y: chart.helpfulInfo.cursor.chartY,
+				},
+				distanceMethod,
+			);
 			if (!point) {
 				return;
 			}

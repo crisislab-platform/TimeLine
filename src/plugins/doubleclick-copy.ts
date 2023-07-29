@@ -1,21 +1,28 @@
-import { TimeLinePlugin } from "../types";
-import { getNearestPoint, isPointInBox } from "../utils";
+import { DistanceMethod, TimeLinePlugin } from "../types";
+import { getNearestPoint } from "../utils";
 
 /**
  * This plugin draws a marker on the nearest point to the mouse, when the mouse is over the canvas.
+ * @param distanceMethod The method by which to get the distance to points from the cursor
  * @returns {TimeLinePlugin}
  */
-export const doubleClickCopyPlugin = (): TimeLinePlugin => ({
+export const doubleClickCopyPlugin = (
+	distanceMethod?: DistanceMethod,
+): TimeLinePlugin => ({
 	construct: function (chart) {
 		if ("clipboard" in navigator) {
 			chart.container.addEventListener("dblclick", (event) => {
 				// On double click, copy data to clipboard
 				const rect = chart.canvas.getBoundingClientRect();
 
-				const point = getNearestPoint(chart, {
-					x: event.clientX - rect.x,
-					y: event.clientY - rect.y,
-				});
+				const point = getNearestPoint(
+					chart,
+					{
+						x: event.clientX - rect.x,
+						y: event.clientY - rect.y,
+					},
+					distanceMethod,
+				);
 				if (!point) return;
 				try {
 					// Write in a spreadsheet-pasteable format

@@ -1,5 +1,5 @@
 import type { TimeLine } from "./TimeLine";
-import type { ComputedTimeLineDataPoint, Point } from "./types";
+import type { ComputedTimeLineDataPoint, Point, DistanceMethod } from "./types";
 
 export function distanceBetweenTwoPoints(a: Point, b: Point): number {
 	// Right-angled triangles are magic. Thanks Ancient greeks!
@@ -9,6 +9,7 @@ export function distanceBetweenTwoPoints(a: Point, b: Point): number {
 export function getNearestPoint(
 	chart: TimeLine,
 	point: Point,
+	method: DistanceMethod = "pythagoras",
 ): ComputedTimeLineDataPoint | null {
 	// Sanity check
 	if (chart.computedData.length < 1) return null;
@@ -17,10 +18,24 @@ export function getNearestPoint(
 	let closestDataPoint: ComputedTimeLineDataPoint | null = null;
 	let closestDistance = Number.MAX_VALUE;
 	for (const chartPoint of chart.computedData) {
-		const distance = distanceBetweenTwoPoints(
-			{ x: chartPoint.renderX, y: chartPoint.renderY },
-			point,
-		);
+		let distance: number;
+		if (method === "closest-x") {
+			distance = distanceBetweenTwoPoints(
+				{ x: chartPoint.renderX, y: point.y },
+				point,
+			);
+		} else if (method === "closest-y") {
+			distance = distanceBetweenTwoPoints(
+				{ x: point.x, y: chartPoint.renderY },
+				point,
+			);
+		} else {
+			// Pythagoras
+			distance = distanceBetweenTwoPoints(
+				{ x: chartPoint.renderX, y: chartPoint.renderY },
+				point,
+			);
+		}
 
 		if (distance < closestDistance) {
 			closestDistance = distance;

@@ -14,6 +14,8 @@ export interface ComputedTimeLineDataPoint extends TimeLineDataPoint {
 	renderY: number;
 }
 
+export type DistanceMethod = "pythagoras" | "closest-x" | "closest-y";
+
 type TimeLinePluginHook = (chart: TimeLine) => void;
 export interface TimeLinePlugin {
 	"draw:before"?: TimeLinePluginHook;
