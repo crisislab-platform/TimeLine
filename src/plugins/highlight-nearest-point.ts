@@ -17,23 +17,13 @@ export const highlightNearestPointPlugin = (): TimeLinePlugin => ({
 		});
 	},
 	"draw:after": function (chart) {
-		const rect = chart.canvas.getBoundingClientRect();
 		// Check if the mouse is over the chart
-		if (
-			isPointInBox(
-				this.data.mouseX,
-				this.data.mouseY,
-				rect.x,
-				rect.y,
-				rect.width,
-				rect.height,
-			)
-		) {
-			const chartX = this.data.mouseX - rect.x;
-			const chartY = this.data.mouseY - rect.y;
-
+		if (chart.helpfulInfo.cursor.overChart) {
 			// Get the nearest point
-			const point = getNearestPoint(chart, { x: chartX, y: chartY });
+			const point = getNearestPoint(chart, {
+				x: chart.helpfulInfo.cursor.chartX,
+				y: chart.helpfulInfo.cursor.chartY,
+			});
 			if (!point) {
 				return;
 			}

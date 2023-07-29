@@ -28,29 +28,15 @@ export const nearestPointInfoPopupPlugin = (
 		chart.container.appendChild(this.data.styleTag);
 		this.data.hoverText.classList.add("crisislab-timeline-hover-text");
 		chart.container.appendChild(this.data.hoverText);
-		window.addEventListener("mousemove", (event) => {
-			this.data.mouseX = event.clientX;
-			this.data.mouseY = event.clientY;
-		});
 	},
 	"draw:after": function (chart) {
-		const rect = chart.canvas.getBoundingClientRect();
 		// Check if the mouse is over the chart
-		if (
-			isPointInBox(
-				this.data.mouseX,
-				this.data.mouseY,
-				rect.x,
-				rect.y,
-				rect.width,
-				rect.height,
-			)
-		) {
-			const chartX = this.data.mouseX - rect.x;
-			const chartY = this.data.mouseY - rect.y;
-
+		if (chart.helpfulInfo.cursor.overChart) {
 			// Get the nearest point
-			const point = getNearestPoint(chart, { x: chartX, y: chartY });
+			const point = getNearestPoint(chart, {
+				x: chart.helpfulInfo.cursor.chartX,
+				y: chart.helpfulInfo.cursor.chartY,
+			});
 			if (!point) {
 				this.data.hoverText.style.display = "none";
 				return;
@@ -67,7 +53,10 @@ ${chart.xLabel}: ${formatX(point.x)}`;
 			this.data.hoverText.style.top = chart.padding.top + "px";
 
 			// Horizontal positioning
-			if (chartX > chart.widthInsidePadding / 2) {
+			if (
+				chart.helpfulInfo.cursor.chartX >
+				chart.widthInsidePadding / 2
+			) {
 				// The -1 is to avoid a double border
 				this.data.hoverText.style.left = chart.padding.left + "px";
 				this.data.hoverText.style.right = "unset";

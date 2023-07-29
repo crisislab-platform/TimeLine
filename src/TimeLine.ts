@@ -3,6 +3,7 @@ import type {
 	TimeLineDataPoint,
 	TimeLinePlugin,
 } from "./types";
+import { isPointInBox } from "./utils";
 
 interface TimeLinePadding {
 	left: number;
@@ -20,6 +21,16 @@ export interface TimeLineOptions {
 	lineWidth?: number;
 	padding?: Partial<TimeLinePadding>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
+}
+
+export interface TimeLineHelpfulInfo {
+	cursor: {
+		x: number;
+		y: number;
+		chartX: number;
+		chartY: number;
+		overChart: boolean;
+	};
 }
 
 // NOTE: Assumes data is sorted by X value, with smallest value first in the list
@@ -40,6 +51,16 @@ export class TimeLine {
 	lineWidth = 0.8;
 	paused = false;
 	padding: TimeLinePadding;
+
+	helpfulInfo: TimeLineHelpfulInfo = {
+		cursor: {
+			x: -1,
+			y: -1,
+			chartX: -1,
+			chartY: -1,
+			overChart: false,
+		},
+	};
 
 	foregroundColour = "black";
 	backgroundColour = "white";
@@ -84,10 +105,54 @@ export class TimeLine {
 
 		// Save 'this'
 		const that = this;
+
 		// Need to make sure that 'this' inside the handler refers to the class
 		window.addEventListener("resize", () => {
 			that.updateCanvas();
 			that.compute();
+		});
+
+		// Start tracking mouse position
+		const calculateRelativeMousePosition = (
+			rect = this.canvas.getBoundingClientRect(),
+		) => {
+			// Calculate position relative to chart
+			if (this.helpfulInfo.cursor.overChart) {
+				this.helpfulInfo.cursor.chartX =
+					this.helpfulInfo.cursor.x - rect.x;
+				this.helpfulInfo.cursor.chartY =
+					this.helpfulInfo.cursor.y - rect.y;
+			} else {
+				this.helpfulInfo.cursor.chartX = -1;
+				this.helpfulInfo.cursor.chartY = -1;
+			}
+		};
+		window.addEventListener("mousemove", (event) => {
+			this.helpfulInfo.cursor.x = event.clientX;
+			this.helpfulInfo.cursor.y = event.clientY;
+
+			// Used by most plugins - save cpu cycles by calculating it once in a central place
+			const rect = this.canvas.getBoundingClientRect();
+			this.helpfulInfo.cursor.overChart = isPointInBox(
+				this.helpfulInfo.cursor.x,
+				this.helpfulInfo.cursor.y,
+				rect.x,
+				rect.y,
+				rect.width,
+				rect.height,
+			);
+
+			calculateRelativeMousePosition(rect);
+		});
+		document.documentElement.addEventListener("mouseleave", () => {
+			this.helpfulInfo.cursor.overChart = false;
+
+			calculateRelativeMousePosition();
+		});
+		document.documentElement.addEventListener("mouseenter", () => {
+			this.helpfulInfo.cursor.overChart = true;
+
+			calculateRelativeMousePosition();
 		});
 
 		// First update
