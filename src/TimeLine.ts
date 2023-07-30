@@ -149,11 +149,6 @@ export class TimeLine {
 
 			calculateRelativeMousePosition();
 		});
-		document.documentElement.addEventListener("mouseenter", () => {
-			this.helpfulInfo.cursor.overChart = true;
-
-			calculateRelativeMousePosition();
-		});
 
 		// First update
 		this.recompute();
