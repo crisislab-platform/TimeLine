@@ -103,7 +103,20 @@ export class TimeLine {
 		this.updateCanvas();
 		// Update canvas on resize
 
-		// Save 'this'
+		this.setupPluginUtilities();
+
+		// First update
+		this.recompute();
+
+		// Call plugins
+		this.handlePluginHooks("construct");
+	}
+
+	/**
+	 * Called during initialisation to set up event handlers for providing extra useful information for plugins.
+	 */
+	private setupPluginUtilities() {
+		// Save 'this' for use in event handler
 		const that = this;
 
 		// Need to make sure that 'this' inside the handler refers to the class
@@ -149,12 +162,6 @@ export class TimeLine {
 
 			calculateRelativeMousePosition();
 		});
-
-		// First update
-		this.recompute();
-
-		// Call plugins
-		this.handlePluginHooks("construct");
 	}
 
 	/**
@@ -199,8 +206,33 @@ export class TimeLine {
 		this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 	}
 
+	/**
+	 * We need to increase the padding by a pixel in each direction so that stuff doesn't go out of frame
+	 */
+	private get computedPadding() {
+		// return this.padding;
+		// Save the value of 'this' for use in getter functions
+		const that = this;
+		return {
+			get left() {
+				return that.padding.left + 1;
+			},
+			get right() {
+				return that.padding.right + 1;
+			},
+			get top() {
+				return that.padding.top + 1;
+			},
+			get bottom() {
+				return that.padding.bottom + 1;
+			},
+		};
+	}
+
 	get widthInsidePadding() {
-		return this.width - this.padding.left - this.padding.right;
+		return (
+			this.width - this.computedPadding.left - this.computedPadding.right
+		);
 	}
 
 	get width() {
@@ -208,13 +240,19 @@ export class TimeLine {
 	}
 
 	get heightInsidePadding() {
-		return this.height - this.padding.bottom - this.padding.top;
+		return (
+			this.height - this.computedPadding.bottom - this.computedPadding.top
+		);
 	}
 
 	get height() {
 		return this.canvas.height / window.devicePixelRatio;
 	}
 
+	/**
+	 * This function does a lot of the heavy lifting for graphing:
+	 * it handles everything we need to scale the graph to fit all the data points
+	 */
 	getRenderOffsetsAndMultipliers(): {
 		xOffset: number;
 		xMultiplier: number;
@@ -299,6 +337,10 @@ export class TimeLine {
 		this.compute();
 	}
 
+	/**
+	 * We compute the positions for each point separately from rendering them,
+	 * to keep render logic clean, and for better performance.
+	 */
 	private compute() {
 		this.handlePluginHooks("compute:before");
 		// Draw the lines
@@ -312,9 +354,11 @@ export class TimeLine {
 		for (const point of this.savedData) {
 			const computedPoint: ComputedTimeLineDataPoint = {
 				...point,
-				renderX: this.padding.left + (point.x + xOffset) * xMultiplier,
+				renderX:
+					this.computedPadding.left +
+					(point.x + xOffset) * xMultiplier,
 				renderY:
-					this.padding.top +
+					this.computedPadding.top +
 					this.heightInsidePadding -
 					(point.y + yOffset) * yMultiplier,
 			};
@@ -342,8 +386,8 @@ export class TimeLine {
 
 		// Draw lines on sides
 		this.ctx.strokeRect(
-			this.padding.left,
-			this.padding.top,
+			this.computedPadding.left,
+			this.computedPadding.top,
 			this.widthInsidePadding,
 			this.heightInsidePadding,
 		);
