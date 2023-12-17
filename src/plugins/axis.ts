@@ -8,13 +8,13 @@ const labelFont = `${labelFontSize}px Arial`;
 
 /**
  * This plugin draws an x-axis on the chart.
- * @param formatLabel A function that converts an x-axis value to a human-readable format
- * @param xMarks The number of markers to show on the x-axis
+ * @param formatLabel A function that converts an time-axis value to a human-readable format
+ * @param timeMarks The number of markers to show on the time-axis
  * @returns {TimeLinePlugin}
  */
-export const xAxisPlugin = (
+export const timeAxisPlugin = (
 	formatLabel: (x: number) => string = (x) => x + "",
-	xMarks = 5,
+	timeMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
 		chart.padding.bottom += 30;
@@ -26,14 +26,14 @@ export const xAxisPlugin = (
 		chart.ctx.textAlign = "start";
 		chart.ctx.textBaseline = "top";
 
-		const xPointGap = Math.floor(chart.maxPoints / xMarks);
+		const timePointGap = Math.floor(chart.timeWindow / timeMarks);
 
-		for (let i = 0; i < xMarks; i++) {
-			const point = chart.computedData[i * xPointGap];
+		for (let i = 0; i < timeMarks; i++) {
+			const point = chart.computedData[i * timePointGap];
 			if (!point) continue;
 			const renderY = chart.height - chart.padding.bottom;
 
-			const label = formatLabel(point.x);
+			const label = formatLabel(point.time);
 			const textX = point.renderX + 5;
 			const textY = renderY + axisGap;
 
@@ -51,19 +51,20 @@ export const xAxisPlugin = (
 
 /**
  * This plugin draws a y-axis on the chart.
- * @param formatLabel A function that converts an y-axis value to a human-readable format
- * @param yMarks The number of markers to show on the y-axis
+ * @param formatLabel A function that converts an value-axis value to a human-readable format
+ * @param valueMarks The number of markers to show on the value-axis
  * @returns {TimeLinePlugin}
  */
-export const yAxisPlugin = (
+export const valueAxisPlugin = (
 	formatLabel: (y: number) => string = (y) => y + "",
-	yMarks = 5,
+	valueMarks = 5,
 ): TimeLinePlugin => ({
 	construct: (chart) => {
 		chart.padding.left += 40;
 	},
 	"draw:after": (chart) => {
-		const { yOffset, yMultiplier } = chart.getRenderOffsetsAndMultipliers();
+		const { valueOffset, valueMultiplier } =
+			chart.getRenderOffsetsAndMultipliers();
 
 		// Set font properties
 		chart.ctx.font = labelFont;
@@ -72,11 +73,12 @@ export const yAxisPlugin = (
 		chart.ctx.textBaseline = "top";
 		chart.ctx.fillStyle = chart.foregroundColour;
 
-		for (let i = 0; i < yMarks; i++) {
-			const yValue = (i * chart.heightInsidePadding) / (yMarks - 1);
-			const yRenderPosition = yValue + chart.padding.top;
+		for (let i = 0; i < valueMarks; i++) {
+			const value = (i * chart.heightInsidePadding) / (valueMarks - 1);
+			const yRenderPosition = value + chart.padding.top;
 			const yDataValue =
-				(chart.heightInsidePadding - yValue) / yMultiplier - yOffset;
+				(chart.heightInsidePadding - value) / valueMultiplier -
+				valueOffset;
 
 			const textX = chart.padding.left - axisGap;
 			const textY = yRenderPosition + axisGap; // Move down so it doesn't overlap the line

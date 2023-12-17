@@ -26,8 +26,9 @@ export const doubleClickCopyPlugin = (
 				if (!point) return;
 				try {
 					// Write in a spreadsheet-pasteable format
-					navigator.clipboard.writeText(`${chart.yLabel}	${point.y}
-${chart.xLabel}	${point.x}`);
+					navigator.clipboard
+						.writeText(`${chart.valueAxisLabel}	${point.value}
+${chart.timeAxisLabel}	${point.time}`);
 				} catch (err) {
 					console.warn("Error writing to clipboard: ", err);
 				}

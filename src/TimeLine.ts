@@ -15,9 +15,9 @@ interface TimeLinePadding {
 export interface TimeLineOptions {
 	container: HTMLElement;
 	data: TimeLineDataPoint[];
-	maxPoints: number;
-	yLabel: string;
-	xLabel: string;
+	timeWindow: number;
+	valueAxisLabel: string;
+	timeAxisLabel: string;
 	lineWidth?: number;
 	padding?: Partial<TimeLinePadding>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
@@ -33,7 +33,7 @@ export interface TimeLineHelpfulInfo {
 	};
 }
 
-// NOTE: Assumes data is sorted by X value, with smallest value first in the list
+// NOTE: Assumes data is sorted by time, with earliest time first in the list
 export class TimeLine {
 	// Raw data points passed by user
 	data: TimeLineDataPoint[];
@@ -45,9 +45,9 @@ export class TimeLine {
 	container: HTMLElement;
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
-	maxPoints: number;
-	yLabel: string;
-	xLabel: string;
+	timeWindow: number;
+	valueAxisLabel: string;
+	timeAxisLabel: string;
 	lineWidth = 0.8;
 	paused = false;
 	padding: TimeLinePadding;
@@ -69,9 +69,9 @@ export class TimeLine {
 	constructor(options: TimeLineOptions) {
 		this.container = options.container;
 		this.data = options.data;
-		this.maxPoints = options.maxPoints;
-		this.xLabel = options.xLabel;
-		this.yLabel = options.yLabel;
+		this.timeWindow = options.timeWindow;
+		this.timeAxisLabel = options.timeAxisLabel;
+		this.valueAxisLabel = options.valueAxisLabel;
 		this.padding = {
 			left: 0,
 			right: 0,
@@ -254,71 +254,85 @@ export class TimeLine {
 	 * it handles everything we need to scale the graph to fit all the data points
 	 */
 	getRenderOffsetsAndMultipliers(): {
-		xOffset: number;
-		xMultiplier: number;
-		yOffset: number;
-		yMultiplier: number;
+		timeOffset: number;
+		timeMultiplier: number;
+		valueOffset: number;
+		valueMultiplier: number;
 	} {
 		// Avoid throwing errors dividing by zero
 		if (this.savedData.length < 2) {
 			return {
-				xOffset: 0,
-				xMultiplier: 1,
-				yOffset: 0,
-				yMultiplier: 1,
+				timeOffset: 0,
+				timeMultiplier: 1,
+				valueOffset: 0,
+				valueMultiplier: 1,
 			};
 		}
 
-		// Calculate X and Y multipliers
+		// Calculate time and value multipliers
 
-		// For X, we need to first figure out the total amount of space used by the points
-		let totalPointWidth = 0;
-		for (let i = 1; i < this.savedData.length; i++) {
-			// Calculate the gap between this point & the previous point
-			const previousPoint = this.savedData[i - 1];
-			const currentPoint = this.savedData[i];
-			const gap = currentPoint.x - previousPoint.x;
+		// The time between the first and last point
+		const timeSpan =
+			this.savedData[this.savedData.length - 1].time -
+			this.savedData[0].time;
 
-			totalPointWidth += gap;
-		}
+		// If points were spaced evenly, this is how far apart they would be
+		const averageTimePerPoint = timeSpan / this.savedData.length;
 
-		// This is what the pointGap would be if all the points were perfectly spaced
-		const averageSpacePerPoint = totalPointWidth / this.savedData.length;
+		const maxPoints = averageTimePerPoint * this.timeWindow;
 
-		// Calculate the X multiplier so that the data all fits in the pane
-		const xMultiplier =
-			this.widthInsidePadding / (this.maxPoints * averageSpacePerPoint);
+		// Calculate the time multiplier so that the data all fits in the pane
+		const spacePerPoint = this.widthInsidePadding / maxPoints;
+		const timeMultiplier = spacePerPoint;
 
-		// Calculate the X-offset so that all data is visible
+		// Left-over space not used up by the current points
+		const extraTime = this.timeWindow - timeSpan;
+		const extraSpaceTime = extraTime;
+
+		// Calculate the time-offset so that all data is visible
 		// & initially the graph scrolls from the right.
-		const xOffset =
-			(this.maxPoints - this.savedData.length) * averageSpacePerPoint -
-			this.savedData[0].x;
+		const timeOffset =
+			extraSpaceTime +
+			-this.savedData[0].time; /*(this.timeWindow - timeSpan) *
+				averageTimePerPoint -
+			this.savedData[0].time;*/
 
+		const l = this.savedData.length;
+		const w = this.timeWindow;
+		console.table({
+			timeWindow: w,
+			timeSpan,
+			numberOfPoints: l,
+			averageTimePerPoint,
+			timeMultiplier,
+			timeOffset,
+			extraTime,
+			extraSpaceTime,
+		});
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 		// Note to future self: Always use -Infinity, not Number.MIN_VALUE
-		let biggestYValue = -Infinity;
-		let smallestYValue = Infinity;
+		let biggestValue = -Infinity;
+		let smallestValue = Infinity;
 		for (const point of this.savedData) {
-			if (point.y > biggestYValue) biggestYValue = point.y;
-			if (point.y < smallestYValue) smallestYValue = point.y;
+			if (point.value > biggestValue) biggestValue = point.value;
+			if (point.value < smallestValue) smallestValue = point.value;
 		}
 
 		// Get the maximum gap
-		const maxYGap = biggestYValue - smallestYValue;
+		const maxValueGap = biggestValue - smallestValue;
 
 		// Now divide the available pixels by that for the multiplier
-		const yMultiplier = this.heightInsidePadding / maxYGap;
+		const valueMultiplier = this.heightInsidePadding / maxValueGap;
 
 		// Y offset is very easy - just the inverse of the smallest number
 		// since we draw from the top
-		const yOffset = -smallestYValue;
+		const valueOffset = -smallestValue;
 
 		return {
-			xOffset,
-			xMultiplier,
-			yOffset,
-			yMultiplier,
+			timeOffset,
+			timeMultiplier,
+			valueOffset,
+			valueMultiplier,
 		};
 	}
 
@@ -344,7 +358,7 @@ export class TimeLine {
 	private compute() {
 		this.handlePluginHooks("compute:before");
 		// Draw the lines
-		const { xOffset, xMultiplier, yOffset, yMultiplier } =
+		const { timeOffset, timeMultiplier, valueOffset, valueMultiplier } =
 			this.getRenderOffsetsAndMultipliers();
 
 		// Clear old data
@@ -356,11 +370,11 @@ export class TimeLine {
 				...point,
 				renderX:
 					this.computedPadding.left +
-					(point.x + xOffset) * xMultiplier,
+					(point.time + timeOffset) * timeMultiplier,
 				renderY:
 					this.computedPadding.top +
 					this.heightInsidePadding -
-					(point.y + yOffset) * yMultiplier,
+					(point.value + valueOffset) * valueMultiplier,
 			};
 			this.computedData.push(computedPoint);
 		}

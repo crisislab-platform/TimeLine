@@ -1,15 +1,13 @@
 import type { TimeLine } from "./TimeLine";
 
-export interface Point {
-	y: number;
-	x: number;
+export interface TimeLineDataPoint {
+	time: number;
+	value: number;
 }
 
-export type TimeLineDataPoint = Point;
-
 export interface ComputedTimeLineDataPoint extends TimeLineDataPoint {
-	y: number;
-	x: number;
+	time: number;
+	value: number;
 	renderX: number;
 	renderY: number;
 }
