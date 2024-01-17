@@ -13,12 +13,6 @@ import {
 const data: Point[] = [];
 const maxPoints = 300;
 const chart = new TimeLine({
-	padding: {
-		left: 12,
-		right: 30,
-		top: 50,
-		bottom: 8,
-	},
 	container: document.getElementById("chart-container") as HTMLElement,
 	data,
 	maxPoints,
@@ -32,7 +26,7 @@ const chart = new TimeLine({
 		highlightNearestPointPlugin(),
 		nearestPointInfoPopupPlugin(),
 		pointerCrosshairPlugin(),
-		axisLabelPlugin(),
+		axisLabelPlugin(true, true, "top", "right"),
 	],
 });
 
