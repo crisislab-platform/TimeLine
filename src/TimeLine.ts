@@ -5,7 +5,7 @@ import type {
 } from "./types";
 import { isPointInBox } from "./utils";
 
-interface TimeLinePadding {
+interface TimeLineSides {
 	left: number;
 	right: number;
 	top: number;
@@ -19,7 +19,7 @@ export interface TimeLineOptions {
 	yLabel: string;
 	xLabel: string;
 	lineWidth?: number;
-	padding?: Partial<TimeLinePadding>;
+	padding?: Partial<TimeLineSides>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
 }
 
@@ -50,7 +50,7 @@ export class TimeLine {
 	xLabel: string;
 	lineWidth = 0.8;
 	paused = false;
-	padding: TimeLinePadding;
+	padding: TimeLineSides;
 
 	helpfulInfo: TimeLineHelpfulInfo = {
 		cursor: {
