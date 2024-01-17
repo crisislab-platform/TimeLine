@@ -1,7 +1,7 @@
 {
 	"name": "@crisislab/timeline",
 	"description": "Time-series graphing library",
-	"version": "0.8.4",
+	"version": "0.8.5",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
