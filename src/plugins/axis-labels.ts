@@ -2,13 +2,18 @@ import { TimeLinePlugin } from "../types";
 
 /**
  * This plugin adds text labels to the X and Y axis.
+ * @returns {TimeLinePlugin}
  * @param showTime Weather or not to add the x-axis label
  * @param showValue Weather or not to add the y-axis label
+ * @param xSide The side to position the x-axis label
+ * @param ySide The side to position the y-axis label
  * @returns {TimeLinePlugin}
  */
 export const axisLabelPlugin = (
 	showTime = true,
 	showValue = true,
+	xSide: "top" | "bottom" = "bottom",
+	ySide: "left" | "right" = "left",
 ): TimeLinePlugin => ({
 	data: {
 		timeLabelEl: document.createElement("p"),
@@ -17,12 +22,10 @@ export const axisLabelPlugin = (
 	},
 	construct: function (chart) {
 		if (showTime) {
-			chart.padding.left += 20;
+			chart.padding[ySide] += 20;
 		}
 		if (showValue) {
-			chart.padding.bottom += 10;
-		}
-
+			chart.padding[xSide] += 10;
 		this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
 				font-size: 16px;
 				position: absolute;
@@ -32,17 +35,21 @@ export const axisLabelPlugin = (
 			.crisislab-timeline-axis-label.crisislab-timeline-time-axis {
 				left: 50%;
 				transform: translateX(-50%);
-				bottom: 0px;
-				margin-bottom: 2px;
+				${xSide}: 0px;
+				margin-${xSide}: 2px;
 
 			}
 
 			.crisislab-timeline-axis-label.crisislab-timeline-value-axis {
-                left: 0px;
+        ${ySide}: 0px;
 				top: 50%;
-				writing-mode: vertical-rl;
-				transform: rotate(180deg) translateY(50%);
-				margin-left: 1px;
+				writing-mode: vertical-lr;
+				transform: ${
+					ySide === "left"
+						? "rotate(180deg) translateY(50%)"
+						: "translateY(-50%)"
+				};
+				margin-${ySide}: 1px;
 			}`;
 		chart.container.appendChild(this.data.styleTag);
 
