@@ -67,16 +67,15 @@ export const timeAxisPlugin = (
 export const valueAxisPlugin = (
 	formatLabel: (y: number) => string = (y) => y + "",
 	valueMarks = 5,
-  side: "left" | "right" = "left",
+	side: "left" | "right" = "left",
 ): TimeLinePlugin => ({
 	construct: (chart) => {
 		chart.padding[side] += 40;
 	},
 	"draw:after": (chart) => {
-    const onLeft = side === "left";
+		const onLeft = side === "left";
 		const { valueOffset, valueMultiplier } =
 			chart.getRenderOffsetsAndMultipliers();
-
 
 		// Set font properties
 		chart.ctx.font = labelFont;
