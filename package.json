@@ -24,7 +24,7 @@
 		"type": "git",
 		"url": "https://github.com/crisislab-platform/TimeLine.git"
 	},
-	"homepage": "https://github.com/crisislab-platform/TimeLine",
+	"homepage": "https://crisislab-timeline.pages.dev/examples/",
 	"author": {
 		"name": "Zade Viggers",
 		"email": "zviggers@massey.ac.nz"
