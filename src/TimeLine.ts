@@ -70,8 +70,8 @@ export class TimeLine {
 		this.container = options.container;
 		this.data = options.data;
 		this.timeWindow = options.timeWindow;
-		this.timeAxisLabel = options.timeAxisLabel;
 		this.valueAxisLabel = options.valueAxisLabel;
+		this.timeAxisLabel = options.timeAxisLabel;
 		this.padding = {
 			left: 0,
 			right: 0,

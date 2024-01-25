@@ -1,7 +1,7 @@
-import { TimeLine, Point } from "../../src";
+import { TimeLine, TimeLineDataPoint } from "../../src/index";
 
-const data: Point[] = [];
-const maxPoints = 300;
+const data: TimeLineDataPoint[] = [];
+const timeWindow = 30 * 1000;
 const chart = new TimeLine({
 	padding: {
 		left: 12,
@@ -11,10 +11,10 @@ const chart = new TimeLine({
 	},
 	container: document.getElementById("chart-container") as HTMLElement,
 	data,
-	maxPoints,
+	timeWindow,
 	// Note that these aren't used by the chart itself, they're just used by plugins
-	xLabel: "Time",
-	yLabel: "Random numbers",
+	timeAxisLabel: "Time",
+	valueAxisLabel: "Random numbers",
 });
 
 let prev = 0;
@@ -23,16 +23,9 @@ setInterval(() => {
 		prev + Math.floor(Math.random() * 10) * (Math.random() > 0.5 ? -1 : 1);
 	prev = y;
 	data.push({
-		x: Date.now(),
-		y,
+		time: Date.now(),
+		value: y,
 	});
-	// This is very important!
-	// You can't have more points in the data array
-	// than chart.maxPoints, or you'll have weird
-	// rendering issues.
-	while (data.length > maxPoints) {
-		data.shift();
-	}
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();

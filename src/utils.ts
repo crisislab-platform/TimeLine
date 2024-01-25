@@ -1,14 +1,21 @@
 import type { TimeLine } from "./TimeLine";
-import type { ComputedTimeLineDataPoint, Point, DistanceMethod } from "./types";
+import type {
+	ComputedTimeLineDataPoint,
+	TimeLineDataPoint,
+	DistanceMethod,
+} from "./types";
 
-export function distanceBetweenTwoPoints(a: Point, b: Point): number {
+export function distanceBetweenTwoPoints(
+	a: TimeLineDataPoint,
+	b: TimeLineDataPoint,
+): number {
 	// Right-angled triangles are magic. Thanks Ancient greeks!
 	return Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
 }
 
 export function getNearestPoint(
 	chart: TimeLine,
-	point: Point,
+	point: TimeLineDataPoint,
 	method: DistanceMethod = "pythagoras",
 ): ComputedTimeLineDataPoint | null {
 	// Sanity check

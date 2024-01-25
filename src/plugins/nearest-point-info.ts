@@ -52,7 +52,7 @@ export const nearestPointInfoPopupPlugin = (
 			this.data.hoverText.innerText = `${chart.valueAxisLabel}: ${formatY(
 				point.value,
 			)}
-${chart.timeAxisLabel}: ${formatX(point.time)}`;
+${chart.valueAxisLabel}: ${formatX(point.time)}`;
 			this.data.hoverText.style.display = "block";
 
 			// Vertical positioning

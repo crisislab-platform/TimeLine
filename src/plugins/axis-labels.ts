@@ -54,7 +54,7 @@ export const axisLabelPlugin = (
 			chart.container.appendChild(this.data.styleTag);
 
 			if (showTime) {
-				this.data.timeLabelEl.innerText = chart.timeAxisLabel;
+				this.data.timeLabelEl.innerText = chart.valueAxisLabel;
 				this.data.timeLabelEl.className =
 					"crisislab-timeline-axis-label crisislab-timeline-time-axis";
 				chart.container.appendChild(this.data.timeLabelEl);

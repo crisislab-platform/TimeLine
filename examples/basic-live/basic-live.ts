@@ -22,6 +22,8 @@ const chart = new TimeLine({
 		axisLabelPlugin(),
 	],
 });
+
+// @ts-ignore
 window.chart = chart;
 
 let prev = 0;
@@ -33,13 +35,6 @@ setInterval(() => {
 		time: Date.now(),
 		value,
 	});
-	// This is very important!
-	// You can't have more points in the data array
-	// than chart.maxPoints, or you'll have weird
-	// rendering issues.
-	while (data.length > 300) {
-		data.shift();
-	}
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
