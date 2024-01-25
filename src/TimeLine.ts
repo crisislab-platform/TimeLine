@@ -110,6 +110,14 @@ export class TimeLine {
 
 		// Call plugins
 		this.handlePluginHooks("construct");
+
+		// Start draw cycle
+		const that = this;
+		function drawLoop() {
+			requestAnimationFrame(drawLoop);
+			that.draw();
+		}
+		drawLoop();
 	}
 
 	/**
@@ -368,7 +376,8 @@ export class TimeLine {
 	}
 
 	/**
-	 * Call this to draw the graph. The most recently computed data is used.
+	 * Call this to force a draw of the graph. The most recently computed data is used.
+	 * This is called automatically, so you probably don't need to call it.
 	 */
 	draw() {
 		// Don't try and draw if we don't have any data
