@@ -26,7 +26,7 @@ export const axisLabelPlugin = (
 		}
 		if (showValue) {
 			chart.padding[xSide] += 10;
-		this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
+			this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
 				font-size: 16px;
 				position: absolute;
 				user-select: none;
@@ -51,20 +51,21 @@ export const axisLabelPlugin = (
 				};
 				margin-${ySide}: 1px;
 			}`;
-		chart.container.appendChild(this.data.styleTag);
+			chart.container.appendChild(this.data.styleTag);
 
-		if (showTime) {
-			this.data.timeLabelEl.innerText = chart.timeAxisLabel;
-			this.data.timeLabelEl.className =
-				"crisislab-timeline-axis-label crisislab-timeline-time-axis";
-			chart.container.appendChild(this.data.timeLabelEl);
-		}
+			if (showTime) {
+				this.data.timeLabelEl.innerText = chart.timeAxisLabel;
+				this.data.timeLabelEl.className =
+					"crisislab-timeline-axis-label crisislab-timeline-time-axis";
+				chart.container.appendChild(this.data.timeLabelEl);
+			}
 
-		if (showValue) {
-			this.data.valueLabelEl.innerText = chart.valueAxisLabel;
-			this.data.valueLabelEl.className =
-				"crisislab-timeline-axis-label crisislab-timeline-value-axis";
-			chart.container.appendChild(this.data.valueLabelEl);
+			if (showValue) {
+				this.data.valueLabelEl.innerText = chart.valueAxisLabel;
+				this.data.valueLabelEl.className =
+					"crisislab-timeline-axis-label crisislab-timeline-value-axis";
+				chart.container.appendChild(this.data.valueLabelEl);
+			}
 		}
 	},
 });
