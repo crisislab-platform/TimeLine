@@ -1,0 +1,82 @@
+getRenderOffsetsAndMultipliers(): {
+		timeOffset: number;
+		timeMultiplier: number;
+		valueOffset: number;
+		valueMultiplier: number;
+	} {
+		// Avoid throwing errors dividing by zero
+		if (this.savedData.length < 2) {
+			return {
+				timeOffset: 0,
+				timeMultiplier: 1,
+				valueOffset: 0,
+				valueMultiplier: 1,
+			};
+		}
+
+		// Calculate time and value multipliers
+
+		// The time between the first and last point
+		const timeSpan =
+			this.savedData[this.savedData.length - 1].time -
+			this.savedData[0].time;
+
+		// If points were spaced evenly, this is how far apart they would be
+		const averageTimePerPoint = timeSpan / this.savedData.length;
+
+		// Calculate the time multiplier so that the data all fits in the pane
+		const timeMultiplier =
+			(this.widthInsidePadding / averageTimePerPoint) * this.timeWindow;
+
+		// Left-over space not used up by the current points
+		const extraTime = this.timeWindow - timeSpan;
+		const extraSpaceTime =
+			(this.widthInsidePadding / averageTimePerPoint) * extraTime;
+
+		// Calculate the time-offset so that all data is visible
+		// & initially the graph scrolls from the right.
+		const timeOffset =
+			extraSpaceTime +
+			-this.savedData[0].time; /*(this.timeWindow - timeSpan) *
+				averageTimePerPoint -
+			this.savedData[0].time;*/
+
+		const l = this.savedData.length;
+		const w = this.timeWindow;
+		console.table({
+			timeWindow: w,
+			timeSpan,
+			numberOfPoints: l,
+			averageTimePerPoint,
+			timeMultiplier,
+			timeOffset,
+			extraTime,
+			extraSpaceTime,
+		});
+
+		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
+		// Note to future self: Always use -Infinity, not Number.MIN_VALUE
+		let biggestValue = -Infinity;
+		let smallestValue = Infinity;
+		for (const point of this.savedData) {
+			if (point.value > biggestValue) biggestValue = point.value;
+			if (point.value < smallestValue) smallestValue = point.value;
+		}
+
+		// Get the maximum gap
+		const maxValueGap = biggestValue - smallestValue;
+
+		// Now divide the available pixels by that for the multiplier
+		const valueMultiplier = this.heightInsidePadding / maxValueGap;
+
+		// Y offset is very easy - just the inverse of the smallest number
+		// since we draw from the top
+		const valueOffset = -smallestValue;
+
+		return {
+			timeOffset,
+			timeMultiplier,
+			valueOffset,
+			valueMultiplier,
+		};
+	}

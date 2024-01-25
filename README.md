@@ -33,24 +33,24 @@ Typescript definitions are included in the package.
 ```ts
 import {
 	TimeLine,
-	Point,
-	xAxisPlugin,
+	TimeLineDataPoint,
+	timeAxisPlugin,
 	axisLabelPlugin,
 } from "@crisislab/timeline";
 
-const data: Point[] = [];
-const maxPoints = 300;
+const data: TimeLineDataPoint[] = [];
+const timeWindow = 30 * 1000;
 const chart = new TimeLine({
 	container: document.getElementById("chart-container") as HTMLElement,
 	data,
-	maxPoints,
+	timeWindow,
 	// Note that these aren't used by the chart itself, they're just used by plugins
-	xLabel: "Time",
-	yLabel: "Random numbers",
+	timeAxisLabel: "Time",
+	valueAxisLabel: "Random numbers",
 	plugins: [
 		// By default, the chart doesn't draw an x or y axis.
 		// You can use these built-in plugins though.
-		xAxisPlugin((x) => new Date(x).toLocaleTimeString()),
+		timeAxisPlugin((x) => new Date(x).toLocaleTimeString()),
 		axisLabelPlugin(),
 	],
 });
@@ -61,16 +61,9 @@ setInterval(() => {
 		prev + Math.floor(Math.random() * 10) * (Math.random() > 0.5 ? -1 : 1);
 	prev = y;
 	data.push({
-		x: Date.now(),
-		y,
+		time: Date.now(),
+		value: y,
 	});
-	// This is very important!
-	// You can't have more points in the data array
-	// than chart.maxPoints, or you'll have weird
-	// rendering issues.
-	while (data.length > maxPoints) {
-		data.shift();
-	}
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
@@ -85,8 +78,8 @@ More examples in the [examples folder](./examples/).
 
 There are several plugins included:
 
--   `xAxisPlugin`: Adds an x-axis (but not an axis label)
--   `yAxisPlugin`: Adds an y-axis (but not an axis label)
+-   `timeAxisPlugin`: Adds an x-axis (but not an axis label)
+-   `valueAxisPlugin`: Adds an y-axis (but not an axis label)
 -   `axisLabelPlugin`: Adds axis labels for the X and Y axis
 -   `pointerCrosshairPlugin`: Adds a crosshair that follows the mouse
 -   `highlightNearestPointPlugin`: Draws a marker on the nearest point to the mouse

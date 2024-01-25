@@ -2,38 +2,37 @@ import { TimeLinePlugin } from "../types";
 
 /**
  * This plugin adds text labels to the X and Y axis.
- * @param showX Weather or not to add the x-axis label
- * @param showY Weather or not to add the y-axis label
+ * @returns {TimeLinePlugin}
+ * @param showTime Weather or not to add the x-axis label
+ * @param showValue Weather or not to add the y-axis label
  * @param xSide The side to position the x-axis label
  * @param ySide The side to position the y-axis label
  * @returns {TimeLinePlugin}
  */
 export const axisLabelPlugin = (
-	showX = true,
-	showY = true,
+	showTime = true,
+	showValue = true,
 	xSide: "top" | "bottom" = "bottom",
 	ySide: "left" | "right" = "left",
 ): TimeLinePlugin => ({
 	data: {
-		xLabelEl: document.createElement("p"),
-		yLabelEl: document.createElement("p"),
+		timeLabelEl: document.createElement("p"),
+		valueLabelEl: document.createElement("p"),
 		styleTag: document.createElement("style"),
 	},
 	construct: function (chart) {
-		if (showY) {
+		if (showTime) {
 			chart.padding[ySide] += 20;
 		}
-		if (showX) {
+		if (showValue) {
 			chart.padding[xSide] += 10;
-		}
-
-		this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
+			this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
 				font-size: 16px;
 				position: absolute;
 				user-select: none;
 				font-family: Arial, sans-serif;
 			}
-			.crisislab-timeline-axis-label.crisislab-timeline-x-axis {
+			.crisislab-timeline-axis-label.crisislab-timeline-time-axis {
 				left: 50%;
 				transform: translateX(-50%);
 				${xSide}: 0px;
@@ -41,8 +40,8 @@ export const axisLabelPlugin = (
 
 			}
 
-			.crisislab-timeline-axis-label.crisislab-timeline-y-axis {
-                ${ySide}: 0px;
+			.crisislab-timeline-axis-label.crisislab-timeline-value-axis {
+        ${ySide}: 0px;
 				top: 50%;
 				writing-mode: vertical-lr;
 				transform: ${
@@ -52,20 +51,21 @@ export const axisLabelPlugin = (
 				};
 				margin-${ySide}: 1px;
 			}`;
-		chart.container.appendChild(this.data.styleTag);
+			chart.container.appendChild(this.data.styleTag);
 
-		if (showX) {
-			this.data.xLabelEl.innerText = chart.xLabel;
-			this.data.xLabelEl.className =
-				"crisislab-timeline-axis-label crisislab-timeline-x-axis";
-			chart.container.appendChild(this.data.xLabelEl);
-		}
+			if (showTime) {
+				this.data.timeLabelEl.innerText = chart.timeAxisLabel;
+				this.data.timeLabelEl.className =
+					"crisislab-timeline-axis-label crisislab-timeline-time-axis";
+				chart.container.appendChild(this.data.timeLabelEl);
+			}
 
-		if (showY) {
-			this.data.yLabelEl.innerText = chart.yLabel;
-			this.data.yLabelEl.className =
-				"crisislab-timeline-axis-label crisislab-timeline-y-axis";
-			chart.container.appendChild(this.data.yLabelEl);
+			if (showValue) {
+				this.data.valueLabelEl.innerText = chart.valueAxisLabel;
+				this.data.valueLabelEl.className =
+					"crisislab-timeline-axis-label crisislab-timeline-value-axis";
+				chart.container.appendChild(this.data.valueLabelEl);
+			}
 		}
 	},
 });

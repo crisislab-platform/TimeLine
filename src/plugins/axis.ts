@@ -1,4 +1,5 @@
 import { TimeLinePlugin } from "../types";
+import { getNearestPoint } from "../utils";
 
 // Consistency
 const labelFontSize = 12;
@@ -8,65 +9,85 @@ const labelFont = `${labelFontSize}px Arial`;
 
 /**
  * This plugin draws an x-axis on the chart.
- * @param formatLabel A function that converts an x-axis value to a human-readable format
- * @param xMarks The number of markers to show on the x-axis
+ * @param formatLabel A function that converts an time-axis value to a human-readable format
+ * @param timeMarks The number of markers to show on the time-axis
  * @param side The side of the graph to render the axis on
  * @returns {TimeLinePlugin}
  */
-export const xAxisPlugin = (
+export const timeAxisPlugin = (
 	formatLabel: (x: number) => string = (x) => x + "",
-	xMarks = 5,
+	timeMarks = 5,
 	side: "top" | "bottom" = "bottom",
-): TimeLinePlugin => ({
-	construct: (chart) => {
-		chart.padding[side] += 30;
-	},
-	"draw:after": (chart) => {
-		const onBottom = side === "bottom";
-		// Set font properties
-		chart.ctx.font = labelFont;
-		chart.ctx.fillStyle = chart.foregroundColour;
-		chart.ctx.textAlign = "start";
-		chart.ctx.textBaseline = onBottom ? "top" : "bottom";
+): TimeLinePlugin => {
+	// Calculate fixed x positions for markers
+	let markerPositions: number[] = [];
 
-		const xPointGap = Math.floor(chart.maxPoints / xMarks);
+	// This is enough space for the labels to breathe comfortably
+	const minMarkerGap = 80;
 
-		for (let i = 0; i < xMarks; i++) {
-			const point = chart.computedData[i * xPointGap];
-			if (!point) continue;
-			const renderY = onBottom
-				? chart.heightInsidePadding + chart.padding.top
-				: chart.padding.top;
+	return {
+		construct: (chart) => {
+			const maxMarkers = Math.floor(chart.width / minMarkerGap);
+			timeMarks = Math.min(timeMarks, maxMarkers);
 
-			const label = formatLabel(point.x);
-			const textX = point.renderX + 5;
-			const textY = renderY + (onBottom ? axisGap : -axisGap);
+			const markerGap = chart.widthInsidePadding / timeMarks;
+			for (let i = 0; i < timeMarks; i++) {
+				markerPositions.push(chart.padding.left + i * markerGap);
+			}
 
-			// Marker
-			chart.ctx.beginPath();
-			chart.ctx.moveTo(point.renderX, renderY);
-			chart.ctx.lineTo(
-				point.renderX,
-				renderY + (onBottom ? tickLength : -tickLength),
-			);
-			chart.ctx.stroke();
+			chart.padding[side] += 30;
+		},
+		"draw:after": (chart) => {
+			const onBottom = side === "bottom";
+			// Set font properties
+			chart.ctx.font = labelFont;
+			chart.ctx.fillStyle = chart.foregroundColour;
+			chart.ctx.textAlign = "start";
+			chart.ctx.textBaseline = onBottom ? "top" : "bottom";
 
-			// Label
-			chart.ctx.fillText(label, textX, textY);
-		}
-	},
-});
+			for (let i = 0; i < timeMarks; i++) {
+				const x = markerPositions[i];
+				const renderY = onBottom
+					? chart.heightInsidePadding + chart.padding.top
+					: chart.padding.top;
+
+				const point = getNearestPoint(
+					chart,
+					{ x, y: renderY },
+					"closest-x",
+				);
+				if (!point) continue;
+
+				const label = formatLabel(point.time);
+				const textX = point.renderX + 5;
+				const textY = renderY + (onBottom ? axisGap : -axisGap);
+
+				// Marker
+				chart.ctx.beginPath();
+				chart.ctx.moveTo(point.renderX, renderY);
+				chart.ctx.lineTo(
+					point.renderX,
+					renderY + (onBottom ? tickLength : -tickLength),
+				);
+				chart.ctx.stroke();
+
+				// Label
+				chart.ctx.fillText(label, textX, textY);
+			}
+		},
+	};
+};
 
 /**
  * This plugin draws a y-axis on the chart.
- * @param formatLabel A function that converts an y-axis value to a human-readable format
- * @param yMarks The number of markers to show on the y-axis
+ * @param formatLabel A function that converts an value-axis value to a human-readable format
+ * @param valueMarks The number of markers to show on the value-axis
  * @param side The side of the graph to render the axis on
  * @returns {TimeLinePlugin}
  */
-export const yAxisPlugin = (
+export const valueAxisPlugin = (
 	formatLabel: (y: number) => string = (y) => y + "",
-	yMarks = 5,
+	valueMarks = 5,
 	side: "left" | "right" = "left",
 ): TimeLinePlugin => ({
 	construct: (chart) => {
@@ -74,7 +95,8 @@ export const yAxisPlugin = (
 	},
 	"draw:after": (chart) => {
 		const onLeft = side === "left";
-		const { yOffset, yMultiplier } = chart.getRenderOffsetsAndMultipliers();
+		const { valueOffset, valueMultiplier } =
+			chart.getRenderOffsetsAndMultipliers();
 
 		// Set font properties
 		chart.ctx.font = labelFont;
@@ -87,11 +109,12 @@ export const yAxisPlugin = (
 			? chart.padding.left
 			: chart.padding.left + chart.widthInsidePadding;
 
-		for (let i = 0; i < yMarks; i++) {
-			const yValue = (i * chart.heightInsidePadding) / (yMarks - 1);
-			const yRenderPosition = yValue + chart.padding.top + 1;
+		for (let i = 0; i < valueMarks; i++) {
+			const value = (i * chart.heightInsidePadding) / (valueMarks - 1);
+			const yRenderPosition = value + chart.padding.top + 1;
 			const yDataValue =
-				(chart.heightInsidePadding - yValue) / yMultiplier - yOffset;
+				(chart.heightInsidePadding - value) / valueMultiplier -
+				valueOffset;
 
 			const textX =
 				relevantChartContentEdgeX + (onLeft ? -axisGap : axisGap);

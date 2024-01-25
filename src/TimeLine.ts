@@ -15,9 +15,9 @@ interface TimeLineSides {
 export interface TimeLineOptions {
 	container: HTMLElement;
 	data: TimeLineDataPoint[];
-	maxPoints: number;
-	yLabel: string;
-	xLabel: string;
+	timeWindow: number;
+	valueAxisLabel: string;
+	timeAxisLabel: string;
 	lineWidth?: number;
 	padding?: Partial<TimeLineSides>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
@@ -33,7 +33,7 @@ export interface TimeLineHelpfulInfo {
 	};
 }
 
-// NOTE: Assumes data is sorted by X value, with smallest value first in the list
+// NOTE: Assumes data is sorted by time, with earliest time first in the list
 export class TimeLine {
 	// Raw data points passed by user
 	data: TimeLineDataPoint[];
@@ -45,9 +45,9 @@ export class TimeLine {
 	container: HTMLElement;
 	canvas: HTMLCanvasElement;
 	ctx: CanvasRenderingContext2D;
-	maxPoints: number;
-	yLabel: string;
-	xLabel: string;
+	timeWindow: number;
+	valueAxisLabel: string;
+	timeAxisLabel: string;
 	lineWidth = 0.8;
 	paused = false;
 	padding: TimeLineSides;
@@ -69,9 +69,9 @@ export class TimeLine {
 	constructor(options: TimeLineOptions) {
 		this.container = options.container;
 		this.data = options.data;
-		this.maxPoints = options.maxPoints;
-		this.xLabel = options.xLabel;
-		this.yLabel = options.yLabel;
+		this.timeWindow = options.timeWindow;
+		this.valueAxisLabel = options.valueAxisLabel;
+		this.timeAxisLabel = options.timeAxisLabel;
 		this.padding = {
 			left: 0,
 			right: 0,
@@ -262,71 +262,59 @@ export class TimeLine {
 	 * it handles everything we need to scale the graph to fit all the data points
 	 */
 	getRenderOffsetsAndMultipliers(): {
-		xOffset: number;
-		xMultiplier: number;
-		yOffset: number;
-		yMultiplier: number;
+		timeOffset: number;
+		timeMultiplier: number;
+		valueOffset: number;
+		valueMultiplier: number;
+		extraTime: number;
 	} {
 		// Avoid throwing errors dividing by zero
 		if (this.savedData.length < 2) {
 			return {
-				xOffset: 0,
-				xMultiplier: 1,
-				yOffset: 0,
-				yMultiplier: 1,
+				timeOffset: 0,
+				timeMultiplier: 1,
+				valueOffset: 0,
+				valueMultiplier: 1,
+				extraTime: 0,
 			};
 		}
 
-		// Calculate X and Y multipliers
+		const usedTime = this.savedData.at(-1)!.time - this.savedData[0].time;
 
-		// For X, we need to first figure out the total amount of space used by the points
-		let totalPointWidth = 0;
-		for (let i = 1; i < this.savedData.length; i++) {
-			// Calculate the gap between this point & the previous point
-			const previousPoint = this.savedData[i - 1];
-			const currentPoint = this.savedData[i];
-			const gap = currentPoint.x - previousPoint.x;
+		// Left-over space not used up by the current points
+		let extraTime = this.timeWindow - usedTime;
 
-			totalPointWidth += gap;
-		}
+		// Time multiplier scales time window to available pixel width
+		const timeMultiplier = this.widthInsidePadding / this.timeWindow;
 
-		// This is what the pointGap would be if all the points were perfectly spaced
-		const averageSpacePerPoint = totalPointWidth / this.savedData.length;
-
-		// Calculate the X multiplier so that the data all fits in the pane
-		const xMultiplier =
-			this.widthInsidePadding / (this.maxPoints * averageSpacePerPoint);
-
-		// Calculate the X-offset so that all data is visible
-		// & initially the graph scrolls from the right.
-		const xOffset =
-			(this.maxPoints - this.savedData.length) * averageSpacePerPoint -
-			this.savedData[0].x;
+		// Time offset anchors window at first point time
+		const timeOffset = -this.savedData[0].time + extraTime;
 
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 		// Note to future self: Always use -Infinity, not Number.MIN_VALUE
-		let biggestYValue = -Infinity;
-		let smallestYValue = Infinity;
+		let biggestValue = -Infinity;
+		let smallestValue = Infinity;
 		for (const point of this.savedData) {
-			if (point.y > biggestYValue) biggestYValue = point.y;
-			if (point.y < smallestYValue) smallestYValue = point.y;
+			if (point.value > biggestValue) biggestValue = point.value;
+			if (point.value < smallestValue) smallestValue = point.value;
 		}
 
 		// Get the maximum gap
-		const maxYGap = biggestYValue - smallestYValue;
+		const maxValueGap = biggestValue - smallestValue;
 
 		// Now divide the available pixels by that for the multiplier
-		const yMultiplier = this.heightInsidePadding / maxYGap;
+		const valueMultiplier = this.heightInsidePadding / maxValueGap;
 
 		// Y offset is very easy - just the inverse of the smallest number
 		// since we draw from the top
-		const yOffset = -smallestYValue;
+		const valueOffset = -smallestValue;
 
 		return {
-			xOffset,
-			xMultiplier,
-			yOffset,
-			yMultiplier,
+			timeOffset,
+			timeMultiplier,
+			valueOffset,
+			valueMultiplier,
+			extraTime,
 		};
 	}
 
@@ -340,7 +328,21 @@ export class TimeLine {
 		// Don't try and compute if less than 2 points
 		if (this.data.length < 2) return;
 
-		this.savedData = window.structuredClone(this.data);
+		// Get the slice of data we're gonna render
+		const finalPoint = this.data[this.data.length - 1];
+		let startIndex = 0;
+		for (let i = this.data.length - 2; i >= 0; i--) {
+			const point = this.data[i];
+			const timeGap = finalPoint.time - point.time;
+
+			// Take the first point that makes us go outside the chart edges
+			if (timeGap > this.timeWindow) {
+				startIndex = i;
+				break;
+			}
+		}
+
+		this.savedData = window.structuredClone(this.data).slice(startIndex);
 
 		this.compute();
 	}
@@ -352,8 +354,47 @@ export class TimeLine {
 	private compute() {
 		this.handlePluginHooks("compute:before");
 		// Draw the lines
-		const { xOffset, xMultiplier, yOffset, yMultiplier } =
-			this.getRenderOffsetsAndMultipliers();
+		const {
+			timeOffset,
+			timeMultiplier,
+			valueOffset,
+			valueMultiplier,
+			extraTime,
+		} = this.getRenderOffsetsAndMultipliers();
+
+		// If we have data overflowing off the left side
+		if (extraTime < 0 && this.savedData.length > 2) {
+			// Replace the 'first' point with one that has a value where the
+			// line connecting it and the second point would cross the y-axis
+			const firstPoint = this.savedData[0];
+			const secondPoint = this.savedData[1];
+			/**  Trig. Full explanation:
+			 *
+			 *
+			 * Calculate slope between points: slope = (y2 - y1) / (x2 - x1)
+			 * The x value where the line crosses vertical line is 'a'
+			 * Starting at point 1, move horizontally by (a - x1) units to get to x=a
+			 * Then move vertically by (slope * (a - x1)) units
+			 * So the y value is: y = y1 + (slope * (a - x1))
+			 * Substituting the slope:
+			 * y = y1 + [(y2 - y1) / (x2 - x1)] * (a - x1)
+			 * Courtesy of Claude AI & Zade Viggers
+			 */
+
+			const axisAlignedTime = firstPoint.time - extraTime;
+
+			const yIntersectValue =
+				firstPoint.value +
+				((secondPoint.value - firstPoint.value) /
+					(secondPoint.time - firstPoint.time)) *
+					(axisAlignedTime - firstPoint.time);
+
+			const newFirstPoint: TimeLineDataPoint = {
+				value: yIntersectValue,
+				time: axisAlignedTime,
+			};
+			this.savedData[0] = newFirstPoint;
+		}
 
 		// Clear old data
 		this.computedData = [];
@@ -364,11 +405,11 @@ export class TimeLine {
 				...point,
 				renderX:
 					this.computedPadding.left +
-					(point.x + xOffset) * xMultiplier,
+					(point.time + timeOffset) * timeMultiplier,
 				renderY:
 					this.computedPadding.top +
 					this.heightInsidePadding -
-					(point.y + yOffset) * yMultiplier,
+					(point.value + valueOffset) * valueMultiplier,
 			};
 			this.computedData.push(computedPoint);
 		}

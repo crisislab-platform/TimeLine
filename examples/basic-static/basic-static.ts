@@ -27,20 +27,21 @@ const chart = new TimeLine({
 window.chart = chart;
 
 let prev = 0;
-setInterval(() => {
+for (let i = 0; i < 400; i++) {
 	const value =
 		prev + Math.floor(Math.random() * 10) * (Math.random() > 0.5 ? -1 : 1);
 	prev = value;
 	data.push({
-		time: Date.now(),
+		time: Date.now() + i * 100,
 		value,
 	});
+}
+// Call chart.recompute() when you're done updating `data`
+chart.recompute();
 
-	// Avoid filling up ram too much
-	if (data.length > 10000) {
-		data.shift();
-	}
-
-	// Call chart.recompute() when you're done updating `data`
-	chart.recompute();
-}, 100);
+// Note that you need to call chart.draw() yourself
+function renderLoop() {
+	requestAnimationFrame(renderLoop);
+	chart.draw();
+}
+renderLoop();
