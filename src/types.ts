@@ -5,6 +5,11 @@ export interface TimeLineDataPoint {
 	value: number;
 }
 
+export interface PlainPoint {
+	x: number;
+	y: number;
+}
+
 export interface ComputedTimeLineDataPoint extends TimeLineDataPoint {
 	time: number;
 	value: number;

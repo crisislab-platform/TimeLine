@@ -1,4 +1,5 @@
 import { TimeLinePlugin } from "../types";
+import { getNearestPoint } from "../utils";
 
 // Consistency
 const labelFontSize = 12;
@@ -17,45 +18,65 @@ export const timeAxisPlugin = (
 	formatLabel: (x: number) => string = (x) => x + "",
 	timeMarks = 5,
 	side: "top" | "bottom" = "bottom",
-): TimeLinePlugin => ({
-	construct: (chart) => {
-		chart.padding[side] += 30;
-	},
-	"draw:after": (chart) => {
-		const onBottom = side === "bottom";
-		// Set font properties
-		chart.ctx.font = labelFont;
-		chart.ctx.fillStyle = chart.foregroundColour;
-		chart.ctx.textAlign = "start";
-		chart.ctx.textBaseline = onBottom ? "top" : "bottom";
+): TimeLinePlugin => {
+	// Calculate fixed x positions for markers
+	let markerPositions: number[] = [];
 
-		const timePointGap = Math.floor(chart.timeWindow / timeMarks);
+	// This is enough space for the labels to breathe comfortably
+	const minMarkerGap = 80;
 
-		for (let i = 0; i < timeMarks; i++) {
-			const point = chart.computedData[i * timePointGap];
-			if (!point) continue;
-			const renderY = onBottom
-				? chart.heightInsidePadding + chart.padding.top
-				: chart.padding.top;
+	return {
+		construct: (chart) => {
+			const maxMarkers = Math.floor(chart.width / minMarkerGap);
+			timeMarks = Math.min(timeMarks, maxMarkers);
 
-			const label = formatLabel(point.time);
-			const textX = point.renderX + 5;
-			const textY = renderY + (onBottom ? axisGap : -axisGap);
+			const markerGap = chart.widthInsidePadding / timeMarks;
+			for (let i = 0; i < timeMarks; i++) {
+				markerPositions.push(chart.padding.left + i * markerGap);
+			}
 
-			// Marker
-			chart.ctx.beginPath();
-			chart.ctx.moveTo(point.renderX, renderY);
-			chart.ctx.lineTo(
-				point.renderX,
-				renderY + (onBottom ? tickLength : -tickLength),
-			);
-			chart.ctx.stroke();
+			chart.padding[side] += 30;
+		},
+		"draw:after": (chart) => {
+			const onBottom = side === "bottom";
+			// Set font properties
+			chart.ctx.font = labelFont;
+			chart.ctx.fillStyle = chart.foregroundColour;
+			chart.ctx.textAlign = "start";
+			chart.ctx.textBaseline = onBottom ? "top" : "bottom";
 
-			// Label
-			chart.ctx.fillText(label, textX, textY);
-		}
-	},
-});
+			for (let i = 0; i < timeMarks; i++) {
+				const x = markerPositions[i];
+				const renderY = onBottom
+					? chart.heightInsidePadding + chart.padding.top
+					: chart.padding.top;
+
+				const point = getNearestPoint(
+					chart,
+					{ x, y: renderY },
+					"closest-x",
+				);
+				if (!point) continue;
+
+				const label = formatLabel(point.time);
+				const textX = point.renderX + 5;
+				const textY = renderY + (onBottom ? axisGap : -axisGap);
+
+				// Marker
+				chart.ctx.beginPath();
+				chart.ctx.moveTo(point.renderX, renderY);
+				chart.ctx.lineTo(
+					point.renderX,
+					renderY + (onBottom ? tickLength : -tickLength),
+				);
+				chart.ctx.stroke();
+
+				// Label
+				chart.ctx.fillText(label, textX, textY);
+			}
+		},
+	};
+};
 
 /**
  * This plugin draws a y-axis on the chart.
