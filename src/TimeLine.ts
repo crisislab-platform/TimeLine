@@ -364,17 +364,34 @@ export class TimeLine {
 
 		// If we have data overflowing off the left side
 		if (extraTime < 0 && this.savedData.length > 2) {
-			// Replace the 'first' point with one that has an average value
-			// and is perfectly aligned with the y-axis
-			// TODO: Use trig to get the point where the line crosses the axis,
-			// instead of just doing an average
-			const averageValue =
-				(this.savedData[0].value + this.savedData[1].value) / 2;
+			// Replace the 'first' point with one that has a value where the
+			// line connecting it and the second point would cross the y-axis
+			const firstPoint = this.savedData[0];
+			const secondPoint = this.savedData[1];
+			/* Trig. Full explanation:
+			Given two points (x1,y1) and (x2,y2), find the intersection with the y-axis.
+			First, calculate the slope between the points:
+			Slope = (y2 - y1) / (x2 - x1)
+			This slope represents the vertical change for each unit of horizontal change.
+			To find the intersection point's y value:
+			Start at point (x1,y1) Move horizontally to the y-axis (x=0) Move vertically by the slope * x1 to account for the horizontal change
+			The y value is: y1 + (slope * x1)
+			So the intersection point is 
+			Using the slope between the points and moving vertically from point 1 based on the horizontal change to the y-axis gives the intersection point.
+			Final formula: y = y1 + ((y2 - y1) / (x2 - x1) * x1)
+			Curtsey of Claude
+			*/
 
-			const axisAlignedTime = this.savedData[0].time - extraTime;
+			const axisAlignedTime = firstPoint.time - extraTime;
+
+			const yIntersectValue =
+				firstPoint.value +
+				((secondPoint.value - firstPoint.value) /
+					(secondPoint.time - firstPoint.time)) *
+					(axisAlignedTime - firstPoint.time);
 
 			const newFirstPoint: TimeLineDataPoint = {
-				value: averageValue,
+				value: yIntersectValue,
 				time: axisAlignedTime,
 			};
 			this.savedData[0] = newFirstPoint;
