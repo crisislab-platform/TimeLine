@@ -15,7 +15,7 @@ const timeWindow = 30 * 1000;
 const chart = new TimeLine({
 	container: document.getElementById("chart-container") as HTMLElement,
 	data,
-	timeWindow: 30 * 1000,
+	timeWindow,
 	timeAxisLabel: "Time",
 	valueAxisLabel: "Random numbers",
 	plugins: [
@@ -38,6 +38,11 @@ setInterval(() => {
 		time: Date.now(),
 		value: y,
 	});
+
+	// Avoid filling up ram too much
+	if (data.length > 10000) {
+		data.shift();
+	}
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();

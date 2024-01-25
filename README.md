@@ -34,7 +34,7 @@ Typescript definitions are included in the package.
 import {
 	TimeLine,
 	TimeLineDataPoint,
-	xAxisPlugin,
+	timeAxisPlugin,
 	axisLabelPlugin,
 } from "@crisislab/timeline";
 
@@ -50,7 +50,7 @@ const chart = new TimeLine({
 	plugins: [
 		// By default, the chart doesn't draw an x or y axis.
 		// You can use these built-in plugins though.
-		xAxisPlugin((x) => new Date(x).toLocaleTimeString()),
+		timeAxisPlugin((x) => new Date(x).toLocaleTimeString()),
 		axisLabelPlugin(),
 	],
 });
@@ -85,8 +85,8 @@ More examples in the [examples folder](./examples/).
 
 There are several plugins included:
 
--   `xAxisPlugin`: Adds an x-axis (but not an axis label)
--   `yAxisPlugin`: Adds an y-axis (but not an axis label)
+-   `timeAxisPlugin`: Adds an x-axis (but not an axis label)
+-   `valueAxisPlugin`: Adds an y-axis (but not an axis label)
 -   `axisLabelPlugin`: Adds axis labels for the X and Y axis
 -   `pointerCrosshairPlugin`: Adds a crosshair that follows the mouse
 -   `highlightNearestPointPlugin`: Draws a marker on the nearest point to the mouse

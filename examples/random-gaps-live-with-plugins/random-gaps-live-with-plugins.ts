@@ -41,6 +41,11 @@ function addPoint() {
 		value: y,
 	});
 
+	// Avoid filling up ram too much
+	if (data.length > 10000) {
+		data.shift();
+	}
+
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
 }

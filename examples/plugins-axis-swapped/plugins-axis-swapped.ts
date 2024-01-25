@@ -1,8 +1,8 @@
 import {
 	TimeLine,
 	TimeLineDataPoint,
-	xAxisPlugin,
-	yAxisPlugin,
+	timeAxisPlugin,
+	valueAxisPlugin,
 	doubleClickCopyPlugin,
 	highlightNearestPointPlugin,
 	nearestPointInfoPopupPlugin,
@@ -20,8 +20,8 @@ const chart = new TimeLine({
 	timeAxisLabel: "Time",
 	valueAxisLabel: "Random numbers",
 	plugins: [
-		xAxisPlugin((x) => new Date(x).toLocaleTimeString(), 5, "top"),
-		yAxisPlugin((a) => a + "", 5, "right"),
+		timeAxisPlugin((x) => new Date(x).toLocaleTimeString(), 5, "top"),
+		valueAxisPlugin((a) => a + "", 5, "right"),
 		doubleClickCopyPlugin(),
 		highlightNearestPointPlugin(),
 		nearestPointInfoPopupPlugin(),
@@ -39,6 +39,11 @@ setInterval(() => {
 		time: Date.now(),
 		value: y,
 	});
+
+	// Avoid filling up ram too much
+	if (data.length > 10000) {
+		data.shift();
+	}
 
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
