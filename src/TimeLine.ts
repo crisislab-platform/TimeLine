@@ -346,7 +346,17 @@ export class TimeLine {
 		// Don't try and compute if less than 2 points
 		if (this.data.length < 2) return;
 
-		this.savedData = window.structuredClone(this.data);
+		// Get the slice of data we're gonna render
+		const finalPoint = this.data[this.data.length - 1];
+		let startIndex = 0;
+		for (let i = this.data.length - 2; i >= 0; i--) {
+			const point = this.data[i];
+			const timeGap = finalPoint.time - point.time;
+			if (timeGap <= this.timeWindow) {
+				startIndex = i;
+			}
+		}
+		this.savedData = window.structuredClone(this.data).slice(startIndex);
 
 		this.compute();
 	}
