@@ -6,10 +6,12 @@
 	"scripts": {
 		"dev": "vite dev",
 		"build": "vite build",
+		"build-site": "BUILD_SITE_NOT_LIBRARY=yes vite build",
 		"deploy": "npm run build && npm publish --access=public",
 		"format": "prettier --write src/**/*"
 	},
 	"devDependencies": {
+		"dotenv": "^16.4.1",
 		"prettier": "^3.2.4",
 		"typescript": "^5.3.3",
 		"vite": "^5.0.12",
