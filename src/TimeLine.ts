@@ -261,6 +261,7 @@ export class TimeLine {
 	} {
 		// Avoid throwing errors dividing by zero
 		if (this.savedData.length < 2) {
+			console.log("saved data less than 2", this.savedData);
 			return {
 				timeOffset: 0,
 				timeMultiplier: 1,
@@ -269,46 +270,19 @@ export class TimeLine {
 			};
 		}
 
-		// Calculate time and value multipliers
-
-		// The time between the first and last point
-		const timeSpan =
+		const usedTimeSpan =
 			this.savedData[this.savedData.length - 1].time -
 			this.savedData[0].time;
 
-		// If points were spaced evenly, this is how far apart they would be
-		const averageTimePerPoint = timeSpan / this.savedData.length;
-
-		const maxPoints = averageTimePerPoint * this.timeWindow;
-
-		// Calculate the time multiplier so that the data all fits in the pane
-		const spacePerPoint = this.widthInsidePadding / maxPoints;
-		const timeMultiplier = spacePerPoint;
-
 		// Left-over space not used up by the current points
-		const extraTime = this.timeWindow - timeSpan;
-		const extraSpaceTime = extraTime;
+		const extraTime = this.timeWindow - usedTimeSpan;
 
-		// Calculate the time-offset so that all data is visible
-		// & initially the graph scrolls from the right.
-		const timeOffset =
-			extraSpaceTime +
-			-this.savedData[0].time; /*(this.timeWindow - timeSpan) *
-				averageTimePerPoint -
-			this.savedData[0].time;*/
+		// Time multiplier scales time window to available pixel width
+		const timeMultiplier = this.widthInsidePadding / this.timeWindow;
 
-		const l = this.savedData.length;
-		const w = this.timeWindow;
-		console.table({
-			timeWindow: w,
-			timeSpan,
-			numberOfPoints: l,
-			averageTimePerPoint,
-			timeMultiplier,
-			timeOffset,
-			extraTime,
-			extraSpaceTime,
-		});
+		// Time offset anchors window at first point time
+		const timeOffset = -this.savedData[0].time + extraTime;
+
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 		// Note to future self: Always use -Infinity, not Number.MIN_VALUE
 		let biggestValue = -Infinity;
