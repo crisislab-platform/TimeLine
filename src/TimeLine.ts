@@ -258,28 +258,31 @@ export class TimeLine {
 		timeMultiplier: number;
 		valueOffset: number;
 		valueMultiplier: number;
+		extraTime: number;
 	} {
 		// Avoid throwing errors dividing by zero
 		if (this.savedData.length < 2) {
+			// TODO: Remove before release
 			console.log("saved data less than 2", this.savedData);
 			return {
 				timeOffset: 0,
 				timeMultiplier: 1,
 				valueOffset: 0,
 				valueMultiplier: 1,
+				extraTime: 0,
 			};
 		}
 
-		const usedTimeSpan =
-			this.savedData[this.savedData.length - 1].time -
-			this.savedData[0].time;
+		const usedTime = this.savedData.at(-1)!.time - this.savedData[0].time;
 
 		// Left-over space not used up by the current points
-		let extraTime = this.timeWindow - usedTimeSpan;
+		let extraTime = this.timeWindow - usedTime;
+
+		console.log(extraTime);
 
 		// Avoid having a gap at the start
 		// This is a horrible evil hack but I give up on fixing the scaling properly
-		if (extraTime < 50) extraTime = 0;
+		// if (extraTime < 50) extraTime = 0;
 
 		// Time multiplier scales time window to available pixel width
 		const timeMultiplier = this.widthInsidePadding / this.timeWindow;
@@ -311,6 +314,7 @@ export class TimeLine {
 			timeMultiplier,
 			valueOffset,
 			valueMultiplier,
+			extraTime,
 		};
 	}
 
@@ -330,8 +334,11 @@ export class TimeLine {
 		for (let i = this.data.length - 2; i >= 0; i--) {
 			const point = this.data[i];
 			const timeGap = finalPoint.time - point.time;
-			if (timeGap <= this.timeWindow) {
+
+			// Take the first point that makes us go outside the chart edges
+			if (timeGap > this.timeWindow) {
 				startIndex = i;
+				break;
 			}
 		}
 
@@ -347,8 +354,31 @@ export class TimeLine {
 	private compute() {
 		this.handlePluginHooks("compute:before");
 		// Draw the lines
-		const { timeOffset, timeMultiplier, valueOffset, valueMultiplier } =
-			this.getRenderOffsetsAndMultipliers();
+		const {
+			timeOffset,
+			timeMultiplier,
+			valueOffset,
+			valueMultiplier,
+			extraTime,
+		} = this.getRenderOffsetsAndMultipliers();
+
+		// If we have data overflowing off the left side
+		if (extraTime < 0 && this.savedData.length > 2) {
+			// Replace the 'first' point with one that has an average value
+			// and is perfectly aligned with the y-axis
+			// TODO: Use trig to get the point where the line crosses the axis,
+			// instead of just doing an average
+			const averageValue =
+				(this.savedData[0].value + this.savedData[1].value) / 2;
+
+			const axisAlignedTime = this.savedData[0].time - extraTime;
+
+			const newFirstPoint: TimeLineDataPoint = {
+				value: averageValue,
+				time: axisAlignedTime,
+			};
+			this.savedData[0] = newFirstPoint;
+		}
 
 		// Clear old data
 		this.computedData = [];

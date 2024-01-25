@@ -27,7 +27,7 @@ const chart = new TimeLine({
 window.chart = chart;
 
 let prev = 0;
-for (let i = 0; i < 1000; i++) {
+for (let i = 0; i < 400; i++) {
 	const value =
 		prev + Math.floor(Math.random() * 10) * (Math.random() > 0.5 ? -1 : 1);
 	prev = value;

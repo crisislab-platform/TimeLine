@@ -11,7 +11,7 @@ import {
 } from "../../src/index";
 
 const data: TimeLineDataPoint[] = [];
-const timeWindow = 30 * 1000;
+const timeWindow = 5 * 1000;
 const chart = new TimeLine({
 	container: document.getElementById("chart-container") as HTMLElement,
 	data,
@@ -29,9 +29,11 @@ const chart = new TimeLine({
 	],
 });
 
+window.data = data;
+window.chart = chart;
 let prev = 0;
 function addPoint() {
-	setTimeout(addPoint, Math.random() * 50);
+	setTimeout(addPoint, Math.random() * 100);
 
 	const y =
 		prev + Math.floor(Math.random() * 10) * (Math.random() > 0.5 ? -1 : 1);
