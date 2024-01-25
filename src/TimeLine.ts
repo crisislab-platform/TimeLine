@@ -262,8 +262,6 @@ export class TimeLine {
 	} {
 		// Avoid throwing errors dividing by zero
 		if (this.savedData.length < 2) {
-			// TODO: Remove before release
-			console.log("saved data less than 2", this.savedData);
 			return {
 				timeOffset: 0,
 				timeMultiplier: 1,
@@ -277,12 +275,6 @@ export class TimeLine {
 
 		// Left-over space not used up by the current points
 		let extraTime = this.timeWindow - usedTime;
-
-		console.log(extraTime);
-
-		// Avoid having a gap at the start
-		// This is a horrible evil hack but I give up on fixing the scaling properly
-		// if (extraTime < 50) extraTime = 0;
 
 		// Time multiplier scales time window to available pixel width
 		const timeMultiplier = this.widthInsidePadding / this.timeWindow;
@@ -368,19 +360,18 @@ export class TimeLine {
 			// line connecting it and the second point would cross the y-axis
 			const firstPoint = this.savedData[0];
 			const secondPoint = this.savedData[1];
-			/* Trig. Full explanation:
-			Given two points (x1,y1) and (x2,y2), find the intersection with the y-axis.
-			First, calculate the slope between the points:
-			Slope = (y2 - y1) / (x2 - x1)
-			This slope represents the vertical change for each unit of horizontal change.
-			To find the intersection point's y value:
-			Start at point (x1,y1) Move horizontally to the y-axis (x=0) Move vertically by the slope * x1 to account for the horizontal change
-			The y value is: y1 + (slope * x1)
-			So the intersection point is 
-			Using the slope between the points and moving vertically from point 1 based on the horizontal change to the y-axis gives the intersection point.
-			Final formula: y = y1 + ((y2 - y1) / (x2 - x1) * x1)
-			Curtsey of Claude
-			*/
+			/**  Trig. Full explanation:
+			 *
+			 *
+			 * Calculate slope between points: slope = (y2 - y1) / (x2 - x1)
+			 * The x value where the line crosses vertical line is 'a'
+			 * Starting at point 1, move horizontally by (a - x1) units to get to x=a
+			 * Then move vertically by (slope * (a - x1)) units
+			 * So the y value is: y = y1 + (slope * (a - x1))
+			 * Substituting the slope:
+			 * y = y1 + [(y2 - y1) / (x2 - x1)] * (a - x1)
+			 * Courtesy of Claude AI & Zade Viggers
+			 */
 
 			const axisAlignedTime = firstPoint.time - extraTime;
 
