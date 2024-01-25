@@ -8,7 +8,7 @@
 		"build": "vite build",
 		"build-site": "BUILD_SITE_NOT_LIBRARY=yes vite build",
 		"deploy": "npm run build && npm publish --access=public",
-		"format": "prettier --write src/**/*"
+		"format": "prettier --write src/**/* vite.config.js"
 	},
 	"devDependencies": {
 		"dotenv": "^16.4.1",
