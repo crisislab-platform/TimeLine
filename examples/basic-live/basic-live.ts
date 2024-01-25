@@ -44,10 +44,3 @@ setInterval(() => {
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
 }, 100);
-
-// Note that you need to call chart.draw() yourself
-function renderLoop() {
-	requestAnimationFrame(renderLoop);
-	chart.draw();
-}
-renderLoop();

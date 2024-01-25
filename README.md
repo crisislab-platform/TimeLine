@@ -1,6 +1,8 @@
 # TimeLine
 
-TimeLine is the dependency-free Typescript time-series web realtime graphing library developed in-house at [CRISiSLab](https://www.crisislab.org.nz/).
+[GitHub](https://github.com/crisislab-platform/TimeLine) | [NPM](https://www.npmjs.com/package/@crisislab/timeline)
+
+TimeLine is the dependency-free time-series web realtime graphing library developed using Typescript in-house at [CRISiSLab](https://www.crisislab.org.nz/).
 
 We use TimeLine in production [here](https://shakemap.crisislab.org.nz/).
 
@@ -22,8 +24,6 @@ Typescript definitions are included in the package.
 -   Make sure that the `data` array you give to the chart isn't longer than `maxLength`
 -   Call `chart.recompute()` whenever you've updated the data array. You can also use this to batch changes by waiting until you're done modifying `data` before recomputing.
 -   The chart won't compute or draw anything if there are less than two points.
--   The chart doesn't automatically draw itself. You have to call `chart.draw()`. Note: calling `chart.recompute()` won't re-draw the chart
--   `chart.draw()` doesn't recompute any data, so if you never call `chart.recompute()`, adding new points to `data` won't show up.
 
 ### Examples
 
@@ -68,13 +68,6 @@ setInterval(() => {
 	// Call chart.recompute() when you're done updating `data`
 	chart.recompute();
 }, 50);
-
-// Note that you need to call chart.draw() yourself
-function renderLoop() {
-	requestAnimationFrame(renderLoop);
-	chart.draw();
-}
-renderLoop();
 ```
 
 </details>

@@ -52,10 +52,3 @@ function addPoint() {
 	chart.recompute();
 }
 addPoint();
-
-// Note that you need to call chart.draw() yourself
-function renderLoop() {
-	requestAnimationFrame(renderLoop);
-	chart.draw();
-}
-renderLoop();
