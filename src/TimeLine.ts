@@ -275,7 +275,11 @@ export class TimeLine {
 			this.savedData[0].time;
 
 		// Left-over space not used up by the current points
-		const extraTime = this.timeWindow - usedTimeSpan;
+		let extraTime = this.timeWindow - usedTimeSpan;
+
+		// Avoid having a gap at the start
+		// This is a horrible evil hack but I give up on fixing the scaling properly
+		if (extraTime < 50) extraTime = 0;
 
 		// Time multiplier scales time window to available pixel width
 		const timeMultiplier = this.widthInsidePadding / this.timeWindow;
@@ -330,6 +334,7 @@ export class TimeLine {
 				startIndex = i;
 			}
 		}
+
 		this.savedData = window.structuredClone(this.data).slice(startIndex);
 
 		this.compute();
