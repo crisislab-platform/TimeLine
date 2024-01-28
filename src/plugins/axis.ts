@@ -15,7 +15,8 @@ const labelFont = `${labelFontSize}px Arial`;
  * @returns {TimeLinePlugin}
  */
 export const timeAxisPlugin = (
-	formatLabel: (x: number) => string = (x) => x + "",
+	formatLabel: (x: number) => string = (x) =>
+		new Date(x).toLocaleTimeString(),
 	timeMarks = 5,
 	side: "top" | "bottom" = "bottom",
 ): TimeLinePlugin => {
@@ -98,7 +99,7 @@ export const timeAxisPlugin = (
  * @returns {TimeLinePlugin}
  */
 export const valueAxisPlugin = (
-	formatLabel: (y: number) => string = (y) => y + "",
+	formatLabel: (y: number) => string = (y) => y.toFixed(2),
 	valueMarks = 5,
 	side: "left" | "right" = "left",
 ): TimeLinePlugin => ({
