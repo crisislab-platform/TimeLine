@@ -25,6 +25,8 @@ export const timeAxisPlugin = (
 	// This is enough space for the labels to breathe comfortably
 	const minMarkerGap = 80;
 
+	const labelSpacing = 20;
+
 	return {
 		construct: (chart) => {
 			const maxMarkers = Math.floor(chart.width / minMarkerGap);
@@ -46,14 +48,14 @@ export const timeAxisPlugin = (
 			chart.ctx.textBaseline = onBottom ? "top" : "bottom";
 
 			for (let i = 0; i < timeMarks; i++) {
-				const x = markerPositions[i];
+				const idealX = markerPositions[i];
 				const renderY = onBottom
 					? chart.heightInsidePadding + chart.padding.top
 					: chart.padding.top;
 
 				const point = getNearestPoint(
 					chart,
-					{ x, y: renderY },
+					{ x: idealX, y: renderY },
 					"closest-x",
 				);
 				if (!point) continue;
@@ -61,6 +63,16 @@ export const timeAxisPlugin = (
 				const label = formatLabel(point.time);
 				const textX = point.renderX + 5;
 				const textY = renderY + (onBottom ? axisGap : -axisGap);
+
+				// Credit to Alex Vauiter (https://github.com/Martian8) for this magic
+				if (
+					i > 0 &&
+					chart.computedData[0].renderX >=
+						idealX -
+							chart.ctx.measureText(label).width -
+							labelSpacing
+				)
+					continue;
 
 				// Marker
 				chart.ctx.beginPath();
