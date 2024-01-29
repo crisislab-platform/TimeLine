@@ -36,9 +36,9 @@ export const timeAxisPlugin = (
 		"calculate-positions": (chart) => {
 			// Set font properties
 			chart.ctx.font = labelFont;
-
 			minMarkerGap =
 				chart.ctx.measureText(formatLabel(Date.now())).width + 20;
+
 			const maxMarkers = Math.floor(chart.width / minMarkerGap);
 			calculatedTimeMarks = Math.min(timeMarks, maxMarkers);
 
