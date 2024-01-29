@@ -45,7 +45,9 @@ export const timeAxisPlugin = (
 			const markerGap = chart.widthInsidePadding / calculatedTimeMarks;
 			markerPositions = [];
 			for (let i = 0; i < calculatedTimeMarks; i++) {
-				markerPositions.push(chart.padding.left + i * markerGap);
+				markerPositions.push(
+					chart.width - chart.padding.right - i * markerGap,
+				);
 			}
 		},
 		"draw:after": (chart) => {
@@ -70,16 +72,14 @@ export const timeAxisPlugin = (
 				if (!point) continue;
 
 				const label = formatLabel(point.time);
-				const textX = point.renderX + 5;
+				const textWidth = chart.ctx.measureText(label).width;
+				const textX = point.renderX - textWidth - 5;
 				const textY = renderY + (onBottom ? axisGap : -axisGap);
 
 				// Credit to Alex Vauiter (https://github.com/Martian8) for this magic
 				if (
 					i > 0 &&
-					chart.computedData[0].renderX >=
-						idealX -
-							chart.ctx.measureText(label).width -
-							labelSpacing
+					chart.computedData[0].renderX >= idealX - labelSpacing
 				)
 					continue;
 
