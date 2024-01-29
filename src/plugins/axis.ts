@@ -22,23 +22,31 @@ export const timeAxisPlugin = (
 ): TimeLinePlugin => {
 	// Calculate fixed x positions for markers
 	let markerPositions: number[] = [];
+	let calculatedTimeMarks = timeMarks;
 
 	// This is enough space for the labels to breathe comfortably
-	const minMarkerGap = 80;
+	let minMarkerGap = 80;
 
-	const labelSpacing = 20;
+	const labelSpacing = 10;
 
 	return {
 		construct: (chart) => {
-			const maxMarkers = Math.floor(chart.width / minMarkerGap);
-			timeMarks = Math.min(timeMarks, maxMarkers);
+			chart.padding[side] += 30;
+		},
+		"calculate-positions": (chart) => {
+			// Set font properties
+			chart.ctx.font = labelFont;
 
-			const markerGap = chart.widthInsidePadding / timeMarks;
-			for (let i = 0; i < timeMarks; i++) {
+			minMarkerGap =
+				chart.ctx.measureText(formatLabel(Date.now())).width + 20;
+			const maxMarkers = Math.floor(chart.width / minMarkerGap);
+			calculatedTimeMarks = Math.min(timeMarks, maxMarkers);
+
+			const markerGap = chart.widthInsidePadding / calculatedTimeMarks;
+			markerPositions = [];
+			for (let i = 0; i < calculatedTimeMarks; i++) {
 				markerPositions.push(chart.padding.left + i * markerGap);
 			}
-
-			chart.padding[side] += 30;
 		},
 		"draw:after": (chart) => {
 			const onBottom = side === "bottom";
@@ -48,7 +56,7 @@ export const timeAxisPlugin = (
 			chart.ctx.textAlign = "start";
 			chart.ctx.textBaseline = onBottom ? "top" : "bottom";
 
-			for (let i = 0; i < timeMarks; i++) {
+			for (let i = 0; i < calculatedTimeMarks; i++) {
 				const idealX = markerPositions[i];
 				const renderY = onBottom
 					? chart.heightInsidePadding + chart.padding.top

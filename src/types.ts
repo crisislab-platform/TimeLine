@@ -29,4 +29,5 @@ export interface TimeLinePlugin {
 	pause?: TimeLinePluginHook;
 	resume?: TimeLinePluginHook;
 	data?: any;
+	"calculate-positions"?: TimeLinePluginHook;
 }

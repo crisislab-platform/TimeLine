@@ -1,5 +1,4 @@
 import { TimeLinePlugin } from "../types";
-import { isPointInBox } from "../utils";
 
 /**
  * This plugin draws a crosshair when the mouse is on the canvas

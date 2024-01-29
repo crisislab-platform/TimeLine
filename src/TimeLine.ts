@@ -101,15 +101,15 @@ export class TimeLine {
 
 		// Initial update
 		this.updateCanvas();
-		// Update canvas on resize
-
-		this.setupPluginUtilities();
 
 		// First update
 		this.recompute();
 
 		// Call plugins
 		this.handlePluginHooks("construct");
+
+		// Set up other plugin stuff
+		this.setupPluginUtilities();
 
 		// Start draw cycle
 		const that = this;
@@ -124,14 +124,14 @@ export class TimeLine {
 	 * Called during initialisation to set up event handlers for providing extra useful information for plugins.
 	 */
 	private setupPluginUtilities() {
-		// Save 'this' for use in event handler
-		const that = this;
-
 		// Need to make sure that 'this' inside the handler refers to the class
 		window.addEventListener("resize", () => {
-			that.updateCanvas();
-			that.compute();
+			this.updateCanvas();
+			this.compute();
+			this.handlePluginHooks("calculate-positions");
 		});
+		// Also call on setup for first thing
+		this.handlePluginHooks("calculate-positions");
 
 		// Start tracking mouse position
 		const calculateRelativeMousePosition = (
@@ -425,7 +425,6 @@ export class TimeLine {
 		if (this.computedData.length < 2) return;
 
 		this.handlePluginHooks("draw:before");
-		// Draw in black
 		this.ctx.strokeStyle = this.foregroundColour;
 		this.ctx.lineWidth = this.lineWidth;
 		this.ctx.setLineDash([]);
