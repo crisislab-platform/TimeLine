@@ -34,7 +34,6 @@ export interface TimeLineHelpfulInfo {
 	};
 }
 
-// TODO: Add an option to have 'time' be a Date
 // TODO: Add option for padding inside the chart border
 
 // NOTE: Assumes data is sorted by time, with earliest time first in the list
