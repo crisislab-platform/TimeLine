@@ -31,7 +31,7 @@ export const timeAxisPlugin = (
 
 	return {
 		construct: (chart) => {
-			chart.padding[side] += 30;
+			chart.padding[side] += 10;
 		},
 		"calculate-positions": (chart) => {
 			// Set font properties
@@ -114,7 +114,7 @@ export const valueAxisPlugin = (
 	construct: (chart) => {
 		chart.padding.top += labelFontSize + axisGap;
 
-		chart.padding[side] += 40;
+		chart.padding[side] += 50;
 	},
 	"draw:after": (chart) => {
 		const onLeft = side === "left";
