@@ -34,7 +34,6 @@ export interface TimeLineHelpfulInfo {
 }
 
 // TODO: Add an option to have 'time' be a Date
-// TODO: Make chart render borders even if data is empty
 // TODO: Add option for padding inside the chart border
 
 // NOTE: Assumes data is sorted by time, with earliest time first in the list
@@ -430,9 +429,6 @@ export class TimeLine {
 	 * This is called automatically, so you probably don't need to call it.
 	 */
 	draw() {
-		// Don't try and draw if we don't have any data
-		if (this.computedData.length < 2) return;
-
 		this.handlePluginHooks("draw:before");
 		this.ctx.strokeStyle = this.foregroundColour;
 		this.ctx.lineWidth = this.lineWidth;
@@ -450,23 +446,27 @@ export class TimeLine {
 			this.heightInsidePadding,
 		);
 
-		// Begin the path
-		this.ctx.beginPath();
+		// Only draw points if we have enough data
+		if (this.computedData.length >= 2) {
+			// Begin the path
+			this.ctx.beginPath();
 
-		// First data point
-		this.ctx.moveTo(
-			this.computedData[0].renderX,
-			this.computedData[0].renderY,
-		);
+			// First data point
+			this.ctx.moveTo(
+				this.computedData[0].renderX,
+				this.computedData[0].renderY,
+			);
 
-		// Loop over all points, other than the first one
-		for (const point of this.computedData.slice(1)) {
-			// Line to moves the 'cursor' to the point we just drew a line to
-			this.ctx.lineTo(point.renderX, point.renderY);
+			// Loop over all points, other than the first one
+			for (const point of this.computedData.slice(1)) {
+				// Line to moves the 'cursor' to the point we just drew a line to
+				this.ctx.lineTo(point.renderX, point.renderY);
+			}
+
+			// Draw the path
+			this.ctx.stroke();
 		}
 
-		// Draw the path
-		this.ctx.stroke();
 		this.handlePluginHooks("draw:after");
 	}
 }
