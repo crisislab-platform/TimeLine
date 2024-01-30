@@ -1,6 +1,11 @@
 import type { TimeLine } from "./TimeLine";
 
 export interface TimeLineDataPoint {
+	time: number | Date;
+	value: number;
+}
+
+export interface TimeLineSavedDataPoint {
 	time: number;
 	value: number;
 }

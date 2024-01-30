@@ -1,6 +1,7 @@
 import type {
 	ComputedTimeLineDataPoint,
 	TimeLineDataPoint,
+	TimeLineSavedDataPoint,
 	TimeLinePlugin,
 } from "./types";
 import { isPointInBox } from "./utils";
@@ -41,7 +42,7 @@ export class TimeLine {
 	// Raw data points passed by user
 	data: TimeLineDataPoint[];
 	// Saved when recompute is called. Only used internally before computedData is done computing
-	savedData: TimeLineDataPoint[] = [];
+	savedData: TimeLineSavedDataPoint[] = [];
 	// Computed when recompute is called. Use this.
 	computedData: ComputedTimeLineDataPoint[] = [];
 
@@ -334,12 +335,18 @@ export class TimeLine {
 		// Don't try and compute if less than 2 points
 		if (this.data.length < 2) return;
 
+		const data = this.data.map((point) => ({
+			value: point.value,
+			time:
+				point.time instanceof Date ? point.time.getTime() : point.time,
+		}));
+
 		// Get the slice of data we're gonna render
-		const finalPoint = this.data[this.data.length - 1];
+		const finalPoint = data[data.length - 1];
 		let startIndex = 0;
 		if (this.timeWindow < Infinity) {
-			for (let i = this.data.length - 2; i >= 0; i--) {
-				const point = this.data[i];
+			for (let i = data.length - 2; i >= 0; i--) {
+				const point = data[i];
 				const timeGap = finalPoint.time - point.time;
 
 				// Take the first point that makes us go outside the chart edges
@@ -350,7 +357,7 @@ export class TimeLine {
 			}
 		}
 
-		this.savedData = window.structuredClone(this.data).slice(startIndex);
+		this.savedData = window.structuredClone(data).slice(startIndex);
 
 		this.compute();
 	}
@@ -397,7 +404,7 @@ export class TimeLine {
 					(secondPoint.time - firstPoint.time)) *
 					(axisAlignedTime - firstPoint.time);
 
-			const newFirstPoint: TimeLineDataPoint = {
+			const newFirstPoint: TimeLineSavedDataPoint = {
 				value: yIntersectValue,
 				time: axisAlignedTime,
 			};
