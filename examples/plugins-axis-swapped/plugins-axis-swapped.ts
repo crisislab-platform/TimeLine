@@ -20,8 +20,8 @@ const chart = new TimeLine({
 	timeAxisLabel: "Time",
 	valueAxisLabel: "Random numbers",
 	plugins: [
-		timeAxisPlugin((x) => new Date(x).toLocaleTimeString(), 5, "top"),
-		valueAxisPlugin((a) => a + "", 5, "right"),
+		timeAxisPlugin(undefined, 5, "top"),
+		valueAxisPlugin(undefined, 5, "right"),
 		doubleClickCopyPlugin(),
 		highlightNearestPointPlugin(),
 		nearestPointInfoPopupPlugin(),

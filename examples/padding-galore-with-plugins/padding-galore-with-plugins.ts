@@ -26,7 +26,7 @@ const chart = new TimeLine({
 	timeAxisLabel: "Time",
 	valueAxisLabel: "Random numbers",
 	plugins: [
-		timeAxisPlugin((x) => new Date(x).toLocaleTimeString()),
+		timeAxisPlugin(),
 		valueAxisPlugin(),
 		doubleClickCopyPlugin(),
 		highlightNearestPointPlugin(),
