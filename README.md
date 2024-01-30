@@ -21,9 +21,8 @@ Typescript definitions are included in the package.
 ### Important notes!
 
 -   `data` should be sorted by x-value, with smallest values first. If you always add new data onto the end, this shouldn't be a problem.
--   Make sure that the `data` array you give to the chart isn't longer than `maxLength`
--   Call `chart.recompute()` whenever you've updated the data array. You can also use this to batch changes by waiting until you're done modifying `data` before recomputing.
--   The chart won't compute or draw anything if there are less than two points.
+-   Call `chart.recompute()` whenever you've updated the data array. You can use this to batch changes by waiting until you're done modifying `data` before recomputing.
+-   The chart won't draw anything if there are less than two points.
 
 ### Examples
 

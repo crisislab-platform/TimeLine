@@ -33,6 +33,10 @@ export interface TimeLineHelpfulInfo {
 	};
 }
 
+// TODO: Add an option to have 'time' be a Date
+// TODO: Make chart render borders even if data is empty
+// TODO: Add option for padding inside the chart border
+
 // NOTE: Assumes data is sorted by time, with earliest time first in the list
 export class TimeLine {
 	// Raw data points passed by user

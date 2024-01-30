@@ -112,6 +112,8 @@ export const valueAxisPlugin = (
 	side: "left" | "right" = "left",
 ): TimeLinePlugin => ({
 	construct: (chart) => {
+		chart.padding.top += labelFontSize + axisGap;
+
 		chart.padding[side] += 40;
 	},
 	"draw:after": (chart) => {
@@ -137,10 +139,14 @@ export const valueAxisPlugin = (
 				(chart.heightInsidePadding - value) / valueMultiplier -
 				valueOffset;
 
+			const label = formatLabel(yDataValue);
+			const labelMetrics = chart.ctx.measureText(label);
+			const labelHeight =
+				labelMetrics.actualBoundingBoxAscent +
+				labelMetrics.actualBoundingBoxDescent;
 			const textX =
 				relevantChartContentEdgeX + (onLeft ? -axisGap : axisGap);
-			const textY = yRenderPosition + axisGap; // Move down so it doesn't overlap the line
-			const label = formatLabel(yDataValue);
+			const textY = yRenderPosition - axisGap - labelHeight; // Move up so it doesn't overlap the line
 
 			//Marker
 			chart.ctx.beginPath();
