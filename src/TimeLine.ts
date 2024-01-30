@@ -15,7 +15,7 @@ interface TimeLineSides {
 export interface TimeLineOptions {
 	container: HTMLElement;
 	data: TimeLineDataPoint[];
-	timeWindow: number;
+	timeWindow?: number;
 	valueAxisLabel: string;
 	timeAxisLabel: string;
 	lineWidth?: number;
@@ -69,7 +69,7 @@ export class TimeLine {
 	constructor(options: TimeLineOptions) {
 		this.container = options.container;
 		this.data = options.data;
-		this.timeWindow = options.timeWindow;
+		this.timeWindow = options.timeWindow ?? Infinity;
 		this.valueAxisLabel = options.valueAxisLabel;
 		this.timeAxisLabel = options.timeAxisLabel;
 		this.padding = {
@@ -282,10 +282,13 @@ export class TimeLine {
 		const usedTime = this.savedData.at(-1)!.time - this.savedData[0].time;
 
 		// Left-over space not used up by the current points
-		let extraTime = this.timeWindow - usedTime;
+		let extraTime =
+			this.timeWindow === Infinity ? 0 : this.timeWindow - usedTime;
 
 		// Time multiplier scales time window to available pixel width
-		const timeMultiplier = this.widthInsidePadding / this.timeWindow;
+		const timeMultiplier =
+			this.widthInsidePadding /
+			(this.timeWindow === Infinity ? usedTime : this.timeWindow);
 
 		// Time offset anchors window at first point time
 		const timeOffset = -this.savedData[0].time + extraTime;
@@ -331,14 +334,16 @@ export class TimeLine {
 		// Get the slice of data we're gonna render
 		const finalPoint = this.data[this.data.length - 1];
 		let startIndex = 0;
-		for (let i = this.data.length - 2; i >= 0; i--) {
-			const point = this.data[i];
-			const timeGap = finalPoint.time - point.time;
+		if (this.timeWindow < Infinity) {
+			for (let i = this.data.length - 2; i >= 0; i--) {
+				const point = this.data[i];
+				const timeGap = finalPoint.time - point.time;
 
-			// Take the first point that makes us go outside the chart edges
-			if (timeGap > this.timeWindow) {
-				startIndex = i;
-				break;
+				// Take the first point that makes us go outside the chart edges
+				if (timeGap > this.timeWindow) {
+					startIndex = i;
+					break;
+				}
 			}
 		}
 
