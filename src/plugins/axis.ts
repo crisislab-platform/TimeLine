@@ -114,7 +114,7 @@ export const valueAxisPlugin = (
 	construct: (chart) => {
 		chart.padding.top += labelFontSize + axisGap;
 
-		chart.padding[side] += 50;
+		chart.padding[side] += 60;
 	},
 	"draw:after": (chart) => {
 		const onLeft = side === "left";
