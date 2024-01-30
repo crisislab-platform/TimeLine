@@ -18,7 +18,6 @@ const chart = new TimeLine({
 	plugins: [
 		// By default, the chart doesn't draw an time or y axis.
 		// You can use these built-in plugins though.
-		timeAxisPlugin(),
 		axisLabelPlugin(),
 	],
 });

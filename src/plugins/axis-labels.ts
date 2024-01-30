@@ -25,7 +25,7 @@ export const axisLabelPlugin = (
 			chart.padding[ySide] += 20;
 		}
 		if (showValue) {
-			chart.padding[xSide] += 10;
+			chart.padding[xSide] += 15;
 			this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
 				font-size: 16px;
 				position: absolute;
