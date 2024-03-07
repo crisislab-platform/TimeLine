@@ -12,8 +12,14 @@ However, this library is designed for one use-case: rendering live seismograph d
 
 ### Installation
 
-```
+```sh
 npm i @crisislab/timeline
+# OR
+pnpm add @crisislab/timeline
+# OR
+deno add @crisislab/timeline
+# OR
+npx jsr add @crisislab/timeline
 ```
 
 Typescript definitions are included in the package.
