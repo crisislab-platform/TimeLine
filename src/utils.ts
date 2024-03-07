@@ -15,7 +15,13 @@ export function plainPointToTimeLineDataPoint(
 export function timeLineDataPointToPlainPoint(
 	timeLinePoint: TimeLineDataPoint,
 ): PlainPoint {
-	return { x: timeLinePoint.time, y: timeLinePoint.value };
+	return {
+		x:
+			typeof timeLinePoint.time === "number"
+				? timeLinePoint.time
+				: timeLinePoint.time.getTime(),
+		y: timeLinePoint.value,
+	};
 }
 
 export function distanceBetweenTwoPoints(a: PlainPoint, b: PlainPoint): number {
