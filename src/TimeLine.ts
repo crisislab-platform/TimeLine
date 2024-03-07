@@ -220,7 +220,12 @@ export class TimeLine {
 	/**
 	 * We need to increase the padding by a pixel in each direction so that stuff doesn't go out of frame
 	 */
-	private get computedPadding() {
+	private get computedPadding(): {
+		left: number;
+		right: number;
+		top: number;
+		bottom: number;
+	} {
 		// return this.padding;
 		// Save the value of 'this' for use in getter functions
 		const that = this;
@@ -240,23 +245,23 @@ export class TimeLine {
 		};
 	}
 
-	get widthInsidePadding() {
+	get widthInsidePadding(): number {
 		return (
 			this.width - this.computedPadding.left - this.computedPadding.right
 		);
 	}
 
-	get width() {
+	get width(): number {
 		return this.canvas.width / window.devicePixelRatio;
 	}
 
-	get heightInsidePadding() {
+	get heightInsidePadding(): number {
 		return (
 			this.height - this.computedPadding.bottom - this.computedPadding.top
 		);
 	}
 
-	get height() {
+	get height(): number {
 		return this.canvas.height / window.devicePixelRatio;
 	}
 

@@ -5,7 +5,7 @@ import { getNearestPoint } from "../utils";
 const labelFontSize = 12;
 const axisGap = 4;
 const tickLength = 18;
-const labelFont = `${labelFontSize}px monospace`;
+const labelFont: string = `${labelFontSize}px monospace`;
 
 /**
  * This plugin draws an x-axis on the chart.
