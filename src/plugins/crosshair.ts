@@ -5,9 +5,16 @@ import { TimeLinePlugin } from "../types";
  * @returns {TimeLinePlugin}
  */
 export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
+	construct(chart) {
+		if (chart.host.type !== "browser")
+			throw "pointerCrosshairPlugin requires a browser host!";
+	},
 	"draw:after": function (chart) {
+		if (chart.host.type !== "browser")
+			throw "pointerCrosshairPlugin requires a browser host!";
+
 		// Check if the mouse is over the chart
-		if (chart.helpfulInfo.cursor.overChart) {
+		if (chart.host.cursorInfo.overChart) {
 			// Thinner line
 			chart.ctx.lineWidth = 0.5;
 
@@ -16,35 +23,34 @@ export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
 
 			// Horizontal line
 			if (
-				chart.helpfulInfo.cursor.chartX > chart.padding.top &&
-				chart.helpfulInfo.cursor.chartY <
+				chart.host.cursorInfo.chartX > chart.padding.top &&
+				chart.host.cursorInfo.chartY <
 					chart.height - chart.padding.bottom
 			) {
 				chart.ctx.beginPath();
 				chart.ctx.moveTo(
 					chart.padding.left,
-					chart.helpfulInfo.cursor.chartY,
+					chart.host.cursorInfo.chartY,
 				);
 				chart.ctx.lineTo(
 					chart.width - chart.padding.right,
-					chart.helpfulInfo.cursor.chartY,
+					chart.host.cursorInfo.chartY,
 				);
 				chart.ctx.stroke();
 			}
 
 			// Vertical line
 			if (
-				chart.helpfulInfo.cursor.chartX > chart.padding.left &&
-				chart.helpfulInfo.cursor.chartX <
-					chart.width - chart.padding.right
+				chart.host.cursorInfo.chartX > chart.padding.left &&
+				chart.host.cursorInfo.chartX < chart.width - chart.padding.right
 			) {
 				chart.ctx.beginPath();
 				chart.ctx.moveTo(
-					chart.helpfulInfo.cursor.chartX,
+					chart.host.cursorInfo.chartX,
 					chart.padding.top,
 				);
 				chart.ctx.lineTo(
-					chart.helpfulInfo.cursor.chartX,
+					chart.host.cursorInfo.chartX,
 					chart.height - chart.padding.bottom,
 				);
 				chart.ctx.stroke();

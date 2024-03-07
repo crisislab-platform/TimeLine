@@ -5,6 +5,26 @@ export interface TimeLineDataPoint {
 	value: number;
 }
 
+export type TimeLineHost = {
+	width: number;
+	height: number;
+	readonly ctx: CanvasRenderingContext2D;
+	chart: TimeLine | null;
+	setup(chart: TimeLine): void;
+	readonly type: "browser" | "server";
+} & {
+	type: "browser";
+	container: HTMLElement;
+	canvas: HTMLCanvasElement;
+	cursorInfo: {
+		x: number;
+		y: number;
+		chartX: number;
+		chartY: number;
+		overChart: boolean;
+	};
+};
+
 export interface TimeLineSavedDataPoint {
 	time: number;
 	value: number;

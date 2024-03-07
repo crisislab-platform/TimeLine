@@ -1,6 +1,10 @@
 {
 	"compilerOptions": {
 		"strict": true,
-		"target": "ESNext"
-	}
+		"target": "ESNext",
+		"allowImportingTsExtensions": true,
+		"moduleResolution": "Bundler",
+		"noEmit": true,
+	},
+	"exclude": ["node_modules", "dist"],
 }

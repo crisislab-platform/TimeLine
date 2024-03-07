@@ -13,7 +13,7 @@ import {
 const data: TimeLineDataPoint[] = [];
 const timeWindow = 5 * 1000;
 const chart = new TimeLine({
-	container: document.getElementById("chart-container") as HTMLElement,
+	container: document.getElementById("chart-container")!,
 	data,
 	timeWindow,
 	timeAxisLabel: "Time",

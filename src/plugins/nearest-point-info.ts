@@ -18,6 +18,9 @@ export const nearestPointInfoPopupPlugin = (
 		styleTag: document.createElement("style"),
 	},
 	construct: function (chart) {
+		if (chart.host.type !== "browser")
+			throw "highlightNearestPointPlugin requires a browser host!";
+
 		this.data.styleTag.innerText = `.crisislab-timeline-hover-text {
 			display: block;
 			position: absolute;
@@ -27,19 +30,19 @@ export const nearestPointInfoPopupPlugin = (
 			border: 1px solid black;
 			top: 0px;
 		}`;
-		chart.container.appendChild(this.data.styleTag);
+		chart.host.container.appendChild(this.data.styleTag);
 		this.data.hoverText.classList.add("crisislab-timeline-hover-text");
-		chart.container.appendChild(this.data.hoverText);
+		chart.host.container.appendChild(this.data.hoverText);
 	},
 	"draw:after": function (chart) {
 		// Check if the mouse is over the chart
-		if (chart.helpfulInfo.cursor.overChart) {
+		if (chart.host.cursorInfo.overChart) {
 			// Get the nearest point
 			const point = getNearestPoint(
 				chart,
 				{
-					x: chart.helpfulInfo.cursor.chartX,
-					y: chart.helpfulInfo.cursor.chartY,
+					x: chart.host.cursorInfo.chartX,
+					y: chart.host.cursorInfo.chartY,
 				},
 				distanceMethod,
 			);
@@ -59,10 +62,7 @@ ${chart.valueAxisLabel}: ${formatX(point.time)}`;
 			this.data.hoverText.style.top = chart.padding.top + "px";
 
 			// Horizontal positioning
-			if (
-				chart.helpfulInfo.cursor.chartX >
-				chart.widthInsidePadding / 2
-			) {
+			if (chart.host.cursorInfo.chartX > chart.widthInsidePadding / 2) {
 				// The -1 is to avoid a double border
 				this.data.hoverText.style.left = chart.padding.left + "px";
 				this.data.hoverText.style.right = "unset";

@@ -10,10 +10,13 @@ export const doubleClickCopyPlugin = (
 	distanceMethod?: DistanceMethod,
 ): TimeLinePlugin => ({
 	construct: function (chart) {
+		if (chart.host.type !== "browser")
+			throw "doubleClickCopyPlugin requires a browser host!";
+
 		if ("clipboard" in navigator) {
-			chart.container.addEventListener("dblclick", (event) => {
+			chart.host.container.addEventListener("dblclick", (event) => {
 				// On double click, copy data to clipboard
-				const rect = chart.canvas.getBoundingClientRect();
+				const rect = chart.host.canvas.getBoundingClientRect();
 
 				const point = getNearestPoint(
 					chart,

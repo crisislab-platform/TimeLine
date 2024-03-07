@@ -13,7 +13,7 @@ import {
 const data: TimeLineDataPoint[] = [];
 const timeWindow = 30 * 1000;
 const chart = new TimeLine({
-	container: document.getElementById("chart-container") as HTMLElement,
+	container: document.getElementById("chart-container")!,
 	data,
 	timeWindow,
 	// Note that these aren't used by the chart itself, they're just used by plugins

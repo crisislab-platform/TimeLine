@@ -1,10 +1,11 @@
+import { DOMHost } from ".";
 import type {
 	ComputedTimeLineDataPoint,
 	TimeLineDataPoint,
 	TimeLineSavedDataPoint,
 	TimeLinePlugin,
+	TimeLineHost,
 } from "./types";
-import { isPointInBox } from "./utils";
 
 interface TimeLineSides {
 	left: number;
@@ -13,8 +14,7 @@ interface TimeLineSides {
 	bottom: number;
 }
 
-export interface TimeLineOptions {
-	container: HTMLElement;
+export type TimeLineOptions = {
 	data: TimeLineDataPoint[];
 	timeWindow?: number;
 	valueAxisLabel: string;
@@ -22,17 +22,7 @@ export interface TimeLineOptions {
 	lineWidth?: number;
 	padding?: Partial<TimeLineSides>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
-}
-
-export interface TimeLineHelpfulInfo {
-	cursor: {
-		x: number;
-		y: number;
-		chartX: number;
-		chartY: number;
-		overChart: boolean;
-	};
-}
+} & ({ host: TimeLineHost } | { container: HTMLElement });
 
 // TODO: Add option for padding inside the chart border
 
@@ -45,9 +35,7 @@ export class TimeLine {
 	// Computed when recompute is called. Use this.
 	computedData: ComputedTimeLineDataPoint[] = [];
 
-	container: HTMLElement;
-	canvas: HTMLCanvasElement;
-	ctx: CanvasRenderingContext2D;
+	host: TimeLineHost;
 	timeWindow: number;
 	valueAxisLabel: string;
 	timeAxisLabel: string;
@@ -55,22 +43,14 @@ export class TimeLine {
 	paused = false;
 	padding: TimeLineSides;
 
-	helpfulInfo: TimeLineHelpfulInfo = {
-		cursor: {
-			x: -1,
-			y: -1,
-			chartX: -1,
-			chartY: -1,
-			overChart: false,
-		},
-	};
-
 	foregroundColour = "black";
 	backgroundColour = "white";
 	plugins: TimeLinePlugin[];
 
 	constructor(options: TimeLineOptions) {
-		this.container = options.container;
+		if ("container" in options) this.host = new DOMHost(options.container);
+		else this.host = options.host;
+
 		this.data = options.data;
 		this.timeWindow = options.timeWindow ?? Infinity;
 		this.valueAxisLabel = options.valueAxisLabel;
@@ -90,29 +70,14 @@ export class TimeLine {
 
 		if (options.lineWidth) this.lineWidth = options.lineWidth;
 
-		// Very important for axis labels
-		this.container.style.position = "relative";
-
-		// Setup canvas
-		this.canvas = document.createElement("canvas");
-		this.canvas.style.width = "100%";
-		this.canvas.style.height = "100%";
-		this.container.appendChild(this.canvas);
-		const context = this.canvas.getContext("2d");
-		if (!context) throw "Unable to get canvas context!";
-		this.ctx = context;
-
-		// Initial update
-		this.updateCanvas();
+		// Set up host stuff
+		this.host.setup(this);
 
 		// First update
 		this.recompute();
 
 		// Call plugins
-		this.handlePluginHooks("construct");
-
-		// Set up other plugin stuff
-		this.setupPluginUtilities();
+		this._handlePluginHooks("construct");
 
 		// Start draw cycle
 		const that = this;
@@ -123,63 +88,16 @@ export class TimeLine {
 		drawLoop();
 	}
 
-	/**
-	 * Called during initialisation to set up event handlers for providing extra useful information for plugins.
-	 */
-	private setupPluginUtilities() {
-		// Need to make sure that 'this' inside the handler refers to the class
-		window.addEventListener("resize", () => {
-			this.updateCanvas();
-			this.compute();
-			this.handlePluginHooks("calculate-positions");
-		});
-		// Also call on setup for first thing
-		this.handlePluginHooks("calculate-positions");
-
-		// Start tracking mouse position
-		const calculateRelativeMousePosition = (
-			rect = this.canvas.getBoundingClientRect(),
-		) => {
-			// Calculate position relative to chart
-			if (this.helpfulInfo.cursor.overChart) {
-				this.helpfulInfo.cursor.chartX =
-					this.helpfulInfo.cursor.x - rect.x;
-				this.helpfulInfo.cursor.chartY =
-					this.helpfulInfo.cursor.y - rect.y;
-			} else {
-				this.helpfulInfo.cursor.chartX = -1;
-				this.helpfulInfo.cursor.chartY = -1;
-			}
-		};
-		window.addEventListener("mousemove", (event) => {
-			this.helpfulInfo.cursor.x = event.clientX;
-			this.helpfulInfo.cursor.y = event.clientY;
-
-			// Used by most plugins - save cpu cycles by calculating it once in a central place
-			const rect = this.canvas.getBoundingClientRect();
-			this.helpfulInfo.cursor.overChart = isPointInBox(
-				this.helpfulInfo.cursor.x,
-				this.helpfulInfo.cursor.y,
-				rect.x,
-				rect.y,
-				rect.width,
-				rect.height,
-			);
-
-			calculateRelativeMousePosition(rect);
-		});
-		document.documentElement.addEventListener("mouseleave", () => {
-			this.helpfulInfo.cursor.overChart = false;
-
-			calculateRelativeMousePosition();
-		});
+	get ctx() {
+		return this.host.ctx;
 	}
 
 	/**
+	 * Don't call this function!
 	 * Helper function for handling plugin hooks
 	 * @param hook The hook to call
 	 */
-	private handlePluginHooks(hook: keyof TimeLinePlugin) {
+	_handlePluginHooks(hook: keyof TimeLinePlugin) {
 		// Call all plugins with that hook defined
 		for (const plugin of this.plugins) {
 			plugin?.[hook]?.(this);
@@ -192,7 +110,7 @@ export class TimeLine {
 	 */
 	pause() {
 		this.paused = true;
-		this.handlePluginHooks("pause");
+		this._handlePluginHooks("pause");
 	}
 
 	/**
@@ -201,20 +119,7 @@ export class TimeLine {
 	resume() {
 		this.paused = false;
 		this.recompute();
-		this.handlePluginHooks("resume");
-	}
-
-	updateCanvas() {
-		// Undo previous scaling
-		this.ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-		// Update width and height
-		const rect = this.canvas.getBoundingClientRect();
-		this.canvas.width = rect.width * window.devicePixelRatio;
-		this.canvas.height = rect.height * window.devicePixelRatio;
-
-		// Scale context
-		this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+		this._handlePluginHooks("resume");
 	}
 
 	/**
@@ -252,7 +157,7 @@ export class TimeLine {
 	}
 
 	get width(): number {
-		return this.canvas.width / window.devicePixelRatio;
+		return this.host.width;
 	}
 
 	get heightInsidePadding(): number {
@@ -262,7 +167,7 @@ export class TimeLine {
 	}
 
 	get height(): number {
-		return this.canvas.height / window.devicePixelRatio;
+		return this.host.height;
 	}
 
 	/**
@@ -363,15 +268,18 @@ export class TimeLine {
 
 		this.savedData = window.structuredClone(data).slice(startIndex);
 
-		this.compute();
+		this._compute();
 	}
 
 	/**
-	 * We compute the positions for each point separately from rendering them,
-	 * to keep render logic clean, and for better performance.
+	 * Don't call this directly. Call `TimeLine#recompute` instead.
 	 */
-	private compute() {
-		this.handlePluginHooks("compute:before");
+	_compute() {
+		/*
+		 * We compute the positions for each point separately from rendering them,
+		 * to keep render logic clean, and for better performance.
+		 */
+		this._handlePluginHooks("compute:before");
 		// Draw the lines
 		const {
 			timeOffset,
@@ -432,7 +340,7 @@ export class TimeLine {
 			};
 			this.computedData.push(computedPoint);
 		}
-		this.handlePluginHooks("compute:after");
+		this._handlePluginHooks("compute:after");
 	}
 
 	/**
@@ -440,7 +348,7 @@ export class TimeLine {
 	 * This is called automatically, so you probably don't need to call it.
 	 */
 	draw() {
-		this.handlePluginHooks("draw:before");
+		this._handlePluginHooks("draw:before");
 		this.ctx.strokeStyle = this.foregroundColour;
 		this.ctx.lineWidth = this.lineWidth;
 		this.ctx.setLineDash([]);
@@ -478,6 +386,6 @@ export class TimeLine {
 			this.ctx.stroke();
 		}
 
-		this.handlePluginHooks("draw:after");
+		this._handlePluginHooks("draw:after");
 	}
 }

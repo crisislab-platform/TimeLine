@@ -7,7 +7,7 @@ import {
 
 const data: TimeLineDataPoint[] = [];
 const chart = new TimeLine({
-	container: document.getElementById("chart-container") as HTMLElement,
+	container: document.getElementById("chart-container")!,
 	data,
 	// Note that these aren't used by the chart itself, they're just used by plugins
 	timeAxisLabel: "Time",

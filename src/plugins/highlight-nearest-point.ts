@@ -10,14 +10,17 @@ export const highlightNearestPointPlugin = (
 	distanceMethod?: DistanceMethod,
 ): TimeLinePlugin => ({
 	"draw:after": function (chart) {
+		if (chart.host.type !== "browser")
+			throw "highlightNearestPointPlugin requires a browser host!";
+
 		// Check if the mouse is over the chart
-		if (chart.helpfulInfo.cursor.overChart) {
+		if (chart.host.cursorInfo.overChart) {
 			// Get the nearest point
 			const point = getNearestPoint(
 				chart,
 				{
-					x: chart.helpfulInfo.cursor.chartX,
-					y: chart.helpfulInfo.cursor.chartY,
+					x: chart.host.cursorInfo.chartX,
+					y: chart.host.cursorInfo.chartY,
 				},
 				distanceMethod,
 			);

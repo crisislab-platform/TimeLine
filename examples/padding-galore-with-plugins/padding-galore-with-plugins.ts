@@ -19,7 +19,7 @@ const chart = new TimeLine({
 		top: 50,
 		bottom: 8,
 	},
-	container: document.getElementById("chart-container") as HTMLElement,
+	container: document.getElementById("chart-container")!,
 	data,
 	timeWindow,
 	// Note that these aren't used by the chart itself, they're just used by plugins

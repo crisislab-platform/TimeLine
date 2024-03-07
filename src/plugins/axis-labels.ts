@@ -1,3 +1,4 @@
+import { DOMHost } from "../hosts";
 import { TimeLinePlugin } from "../types";
 
 /**
@@ -21,6 +22,9 @@ export const axisLabelPlugin = (
 		styleTag: document.createElement("style"),
 	},
 	construct: function (chart) {
+		if (chart.host.type !== "browser")
+			throw "axisLabelPlugin requires a browser host!";
+
 		if (showTime) {
 			chart.padding[ySide] += 20;
 		}
@@ -51,20 +55,20 @@ export const axisLabelPlugin = (
 				};
 				margin-${ySide}: 1px;
 			}`;
-			chart.container.appendChild(this.data.styleTag);
+			chart.host.container.appendChild(this.data.styleTag);
 
 			if (showTime) {
 				this.data.timeLabelEl.innerText = chart.timeAxisLabel;
 				this.data.timeLabelEl.className =
 					"crisislab-timeline-axis-label crisislab-timeline-time-axis";
-				chart.container.appendChild(this.data.timeLabelEl);
+				chart.host.container.appendChild(this.data.timeLabelEl);
 			}
 
 			if (showValue) {
 				this.data.valueLabelEl.innerText = chart.valueAxisLabel;
 				this.data.valueLabelEl.className =
 					"crisislab-timeline-axis-label crisislab-timeline-value-axis";
-				chart.container.appendChild(this.data.valueLabelEl);
+				chart.host.container.appendChild(this.data.valueLabelEl);
 			}
 		}
 	},
