@@ -32,7 +32,7 @@ export const axisLabelPlugin = (
 				font-size: ${fontSize}px;
 				position: absolute;
 				user-select: none;
-				font-family: Arial, sans-serif;
+				font-family: monospace;
 				margin:0;
 				p:0;
 				box-sizing:border-box;
