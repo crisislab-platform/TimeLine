@@ -58,7 +58,7 @@ export const axisLabelPlugin = (
 			chart.container.appendChild(this.data.styleTag);
 
 			if (showTime) {
-				chart.padding[ySide] += characterHeight + timePadding;
+				chart.padding[xSide] += characterHeight + valuePadding;
 
 				this.data.timeLabelEl.innerText = chart.timeAxisLabel;
 				this.data.timeLabelEl.className =
@@ -67,7 +67,7 @@ export const axisLabelPlugin = (
 			}
 
 			if (showValue) {
-				chart.padding[xSide] += characterHeight + valuePadding;
+				chart.padding[ySide] += characterHeight + timePadding;
 
 				this.data.valueLabelEl.innerText = chart.valueAxisLabel;
 				this.data.valueLabelEl.className =

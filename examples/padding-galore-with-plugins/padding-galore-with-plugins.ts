@@ -34,7 +34,7 @@ const chart = new TimeLine({
 		highlightNearestPointPlugin(),
 		nearestPointInfoPopupPlugin(),
 		pointerCrosshairPlugin(),
-		axisLabelPlugin(),
+		axisLabelPlugin(false),
 	],
 });
 
