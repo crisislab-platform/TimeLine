@@ -25,7 +25,7 @@ export interface ComputedTimeLineDataPoint extends TimeLineDataPoint {
 export type DistanceMethod = "pythagoras" | "closest-x" | "closest-y";
 
 type TimeLinePluginHook = (chart: TimeLine) => void;
-export interface TimeLinePlugin {
+export type TimeLinePlugin = {
 	"draw:before"?: TimeLinePluginHook;
 	"draw:after"?: TimeLinePluginHook;
 	"compute:before"?: TimeLinePluginHook;
@@ -35,4 +35,5 @@ export interface TimeLinePlugin {
 	resume?: TimeLinePluginHook;
 	data?: any;
 	"calculate-positions"?: TimeLinePluginHook;
-}
+	// Allow plugins to define internal functions
+} & Record<`plugin_internal:${string}`, Function>;

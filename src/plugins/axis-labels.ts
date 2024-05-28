@@ -14,30 +14,34 @@ export const axisLabelPlugin = (
 	showValue = true,
 	xSide: "top" | "bottom" = "bottom",
 	ySide: "left" | "right" = "left",
-): TimeLinePlugin => ({
-	data: {
-		timeLabelEl: document.createElement("p"),
-		valueLabelEl: document.createElement("p"),
-		styleTag: document.createElement("style"),
-	},
-	construct: function (chart) {
-		if (showTime) {
-			chart.padding[ySide] += 20;
-		}
-		if (showValue) {
-			chart.padding[xSide] += 15;
+): TimeLinePlugin => {
+	const timePadding = 8;
+	const valuePadding = 4;
+
+	const characterHeight = 18;
+	const fontSize = 16;
+
+	return {
+		data: {
+			timeLabelEl: document.createElement("p"),
+			valueLabelEl: document.createElement("p"),
+			styleTag: document.createElement("style"),
+		},
+		construct: function (chart) {
 			this.data.styleTag.innerText = `.crisislab-timeline-axis-label {
-				font-size: 16px;
+				font-size: ${fontSize}px;
 				position: absolute;
 				user-select: none;
 				font-family: Arial, sans-serif;
+				margin:0;
+				p:0;
+				box-sizing:border-box;
 			}
 			.crisislab-timeline-axis-label.crisislab-timeline-time-axis {
 				left: 50%;
 				transform: translateX(-50%);
 				${xSide}: 0px;
-				margin-${xSide}: 2px;
-
+				margin-${xSide}: ${timePadding}px;
 			}
 
 			.crisislab-timeline-axis-label.crisislab-timeline-value-axis {
@@ -49,11 +53,13 @@ export const axisLabelPlugin = (
 						? "rotate(180deg) translateY(50%)"
 						: "translateY(-50%)"
 				};
-				margin-${ySide}: 1px;
+				margin-${ySide}: ${valuePadding}px;
 			}`;
 			chart.container.appendChild(this.data.styleTag);
 
 			if (showTime) {
+				chart.padding[ySide] += characterHeight + timePadding;
+
 				this.data.timeLabelEl.innerText = chart.timeAxisLabel;
 				this.data.timeLabelEl.className =
 					"crisislab-timeline-axis-label crisislab-timeline-time-axis";
@@ -61,11 +67,13 @@ export const axisLabelPlugin = (
 			}
 
 			if (showValue) {
+				chart.padding[xSide] += characterHeight + valuePadding;
+
 				this.data.valueLabelEl.innerText = chart.valueAxisLabel;
 				this.data.valueLabelEl.className =
 					"crisislab-timeline-axis-label crisislab-timeline-value-axis";
 				chart.container.appendChild(this.data.valueLabelEl);
 			}
-		}
-	},
-});
+		},
+	};
+};

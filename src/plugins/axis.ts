@@ -1,3 +1,4 @@
+import { TimeLine } from "../TimeLine";
 import { TimeLinePlugin } from "../types";
 import { getNearestPoint } from "../utils";
 
@@ -29,11 +30,13 @@ export const timeAxisPlugin = (
 
 	const labelSpacing = 10;
 
+	const characterHeight = 18;
+
 	return {
-		construct: (chart) => {
-			chart.padding[side] += 10;
+		construct(chart) {
+			chart.padding[side] += characterHeight;
 		},
-		"calculate-positions": (chart) => {
+		"calculate-positions"(chart) {
 			// Set font properties
 			chart.ctx.font = labelFont;
 			minMarkerGap =
@@ -50,7 +53,7 @@ export const timeAxisPlugin = (
 				);
 			}
 		},
-		"draw:after": (chart) => {
+		"draw:after"(chart) {
 			const onBottom = side === "bottom";
 			// Set font properties
 			chart.ctx.font = labelFont;
@@ -110,55 +113,85 @@ export const valueAxisPlugin = (
 	formatLabel: (y: number) => string = (y) => y.toFixed(2),
 	valueMarks = 5,
 	side: "left" | "right" = "left",
-): TimeLinePlugin => ({
-	construct: (chart) => {
-		chart.padding.top += labelFontSize + axisGap;
+): TimeLinePlugin => {
+	const charWidth = 8;
+	const spacing = 4;
 
-		chart.padding[side] += 60;
-	},
-	"draw:after": (chart) => {
-		const onLeft = side === "left";
-		const { valueOffset, valueMultiplier } =
-			chart.getRenderOffsetsAndMultipliers();
+	return {
+		data: {
+			currentPaddingAdded: charWidth * 4,
+		},
+		"plugin_internal:update_padding_character_amount"(
+			chart: TimeLine,
+			characters: number,
+		) {
+			const newPadding = charWidth * characters;
+			// Only increase the padding, don't decrease it
+			// This avoids jumping around too much
+			if (newPadding > this.data.currentPaddingAdded) {
+				const increase = newPadding - this.data.currentPaddingAdded;
+				console.log("Increasing side padding by " + increase);
+				chart.padding[side] += increase;
+				this.data.currentPaddingAdded = newPadding;
+			}
+		},
+		construct(chart) {
+			chart.padding.top += labelFontSize + axisGap;
 
-		// Set font properties
-		chart.ctx.font = labelFont;
-		chart.ctx.fillStyle = chart.foregroundColour;
-		chart.ctx.textAlign = onLeft ? "right" : "left";
-		chart.ctx.textBaseline = "top";
-		chart.ctx.fillStyle = chart.foregroundColour;
+			chart.padding[side] += spacing + this.data.currentPaddingAdded;
+		},
+		"draw:after"(chart) {
+			const onLeft = side === "left";
+			const { valueOffset, valueMultiplier } =
+				chart.getRenderOffsetsAndMultipliers();
 
-		const relevantChartContentEdgeX = onLeft
-			? chart.padding.left
-			: chart.padding.left + chart.widthInsidePadding;
+			// Set font properties
+			chart.ctx.font = labelFont;
+			chart.ctx.fillStyle = chart.foregroundColour;
+			chart.ctx.textAlign = onLeft ? "right" : "left";
+			chart.ctx.textBaseline = "top";
+			chart.ctx.fillStyle = chart.foregroundColour;
 
-		for (let i = 0; i < valueMarks; i++) {
-			const value = (i * chart.heightInsidePadding) / (valueMarks - 1);
-			const yRenderPosition = value + chart.padding.top + 1;
-			const yDataValue =
-				(chart.heightInsidePadding - value) / valueMultiplier -
-				valueOffset;
+			const relevantChartContentEdgeX = onLeft
+				? chart.padding.left
+				: chart.padding.left + chart.widthInsidePadding;
 
-			const label = formatLabel(yDataValue);
-			const labelMetrics = chart.ctx.measureText(label);
-			const labelHeight =
-				labelMetrics.actualBoundingBoxAscent +
-				labelMetrics.actualBoundingBoxDescent;
-			const textX =
-				relevantChartContentEdgeX + (onLeft ? -axisGap : axisGap);
-			const textY = yRenderPosition - axisGap - labelHeight; // Move up so it doesn't overlap the line
+			for (let i = 0; i < valueMarks; i++) {
+				const value =
+					(i * chart.heightInsidePadding) / (valueMarks - 1);
+				const yRenderPosition = value + chart.padding.top + 1;
+				const yDataValue =
+					(chart.heightInsidePadding - value) / valueMultiplier -
+					valueOffset;
 
-			//Marker
-			chart.ctx.beginPath();
-			chart.ctx.moveTo(
-				relevantChartContentEdgeX + (onLeft ? -tickLength : tickLength),
-				yRenderPosition,
-			);
-			chart.ctx.lineTo(relevantChartContentEdgeX, yRenderPosition);
-			chart.ctx.stroke();
+				const label = formatLabel(yDataValue);
+				// Keep side padding up to date
+				console.log(label);
+				this["plugin_internal:update_padding_character_amount"](
+					chart,
+					label.length,
+				);
+				const labelMetrics = chart.ctx.measureText(label);
+				const labelHeight =
+					labelMetrics.actualBoundingBoxAscent +
+					labelMetrics.actualBoundingBoxDescent;
+				const textX =
+					relevantChartContentEdgeX + (onLeft ? -axisGap : axisGap);
+				const textY = yRenderPosition - axisGap - labelHeight; // Move up so it doesn't overlap the line
 
-			// Label
-			chart.ctx.fillText(label, textX, textY);
-		}
-	},
-});
+				//Marker
+				chart.ctx.beginPath();
+				chart.ctx.moveTo(
+					relevantChartContentEdgeX +
+						(onLeft ? -tickLength : tickLength),
+					yRenderPosition,
+				);
+				chart.ctx.lineTo(relevantChartContentEdgeX, yRenderPosition);
+				chart.ctx.stroke();
+
+				// Label
+				chart.ctx.fillText(label, textX, textY);
+			}
+		},
+	};
+};
