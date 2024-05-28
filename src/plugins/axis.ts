@@ -130,7 +130,6 @@ export const valueAxisPlugin = (
 			// This avoids jumping around too much
 			if (newPadding > this.data.currentPaddingAdded) {
 				const increase = newPadding - this.data.currentPaddingAdded;
-				console.log("Increasing side padding by " + increase);
 				chart.padding[side] += increase;
 				this.data.currentPaddingAdded = newPadding;
 			}
@@ -166,7 +165,6 @@ export const valueAxisPlugin = (
 
 				const label = formatLabel(yDataValue);
 				// Keep side padding up to date
-				console.log(label);
 				this["plugin_internal:update_padding_character_amount"](
 					chart,
 					label.length,
