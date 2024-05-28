@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
 	TimeLine,
 	timeAxisPlugin,
@@ -20,8 +22,8 @@ const chart = new TimeLine({
 	],
 });
 
-// @ts-ignore
 window.chart = chart;
+window.data = data;
 
 let prev = 0;
 setInterval(() => {

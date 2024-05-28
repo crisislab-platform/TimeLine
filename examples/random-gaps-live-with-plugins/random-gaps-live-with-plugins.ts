@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
 	TimeLine,
 	TimeLineDataPoint,
@@ -31,6 +33,7 @@ const chart = new TimeLine({
 
 window.data = data;
 window.chart = chart;
+
 let prev = 0;
 function addPoint() {
 	setTimeout(addPoint, Math.random() * 100);

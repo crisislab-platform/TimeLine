@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { TimeLine, TimeLineDataPoint } from "../../src/index";
 
 const data: TimeLineDataPoint[] = [];
@@ -16,6 +18,9 @@ const chart = new TimeLine({
 	timeAxisLabel: "Time",
 	valueAxisLabel: "Random numbers",
 });
+
+window.chart = chart;
+window.data = data;
 
 let prev = 0;
 setInterval(() => {

@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import {
 	TimeLine,
 	TimeLineDataPoint,
@@ -29,6 +31,9 @@ const chart = new TimeLine({
 		axisLabelPlugin(true, true, "top", "right"),
 	],
 });
+
+window.data = data;
+window.chart = chart;
 
 let prev = 0;
 setInterval(() => {
