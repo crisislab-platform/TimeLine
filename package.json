@@ -5,7 +5,7 @@
 	"version": "0.11.2",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "BUILD_SITE_NOT_LIBRARY=no vite build",
 		"preview": "vite preview",
 		"build-site": "BUILD_SITE_NOT_LIBRARY=yes vite build",
 		"deploy": "npm run build && npx jsr publish && npm publish --access=public",
