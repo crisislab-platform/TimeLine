@@ -27,6 +27,7 @@ export interface TimeLineOptions {
 	lineWidth?: number;
 	padding?: Partial<TimeLineSides>;
 	plugins?: (TimeLinePlugin | null | undefined | false)[];
+	markers?: TimeLineMarker[];
 }
 
 export interface TimeLineHelpfulInfo {
@@ -37,6 +38,12 @@ export interface TimeLineHelpfulInfo {
 		chartY: number;
 		overChart: boolean;
 	};
+}
+
+export interface TimeLineMarker {
+	time: number;
+	label?: string;
+	alwaysShow?: boolean;
 }
 
 // TODO: Add option for padding inside the chart border
@@ -59,6 +66,13 @@ export class TimeLine {
 	lineWidth = 0.8;
 	paused = false;
 	padding: TimeLineSides;
+	fontSize = 16;
+	font = `${this.fontSize}px monospace`;
+
+	#markers: TimeLineMarker[];
+	#earliestMarker?: TimeLineMarker;
+	#latestMarker?: TimeLineMarker;
+	#computedMarkers: (TimeLineMarker & { renderX: number })[] = [];
 
 	valueWindow?: {
 		min: number;
@@ -94,6 +108,7 @@ export class TimeLine {
 			...options.padding,
 		};
 		this.valueWindow = options.valueWindow;
+		this.#markers = options.markers ?? [];
 
 		this.plugins =
 			(options.plugins?.filter(
@@ -277,6 +292,23 @@ export class TimeLine {
 		return this.canvas.height / window.devicePixelRatio;
 	}
 
+	get markers(): TimeLineMarker[] {
+		return this.#markers;
+	}
+
+	addMarker(marker: TimeLineMarker) {
+		this.#markers.push(marker);
+
+		if (!this.#earliestMarker || marker.time < this.#earliestMarker.time) {
+			this.#earliestMarker = marker;
+		} else if (
+			!this.#latestMarker ||
+			marker.time > this.#latestMarker.time
+		) {
+			this.#latestMarker = marker;
+		}
+	}
+
 	/**
 	 * This function does a lot of the heavy lifting for graphing:
 	 * it handles everything we need to scale the graph to fit all the data points
@@ -299,7 +331,25 @@ export class TimeLine {
 			};
 		}
 
-		const usedTime = this.savedData.at(-1)!.time - this.savedData[0].time;
+		let earliestTime = this.savedData.at(-1)!.time;
+		if (
+			this.#earliestMarker &&
+			this.#earliestMarker.alwaysShow &&
+			this.#earliestMarker.time < earliestTime
+		) {
+			earliestTime = this.#earliestMarker.time;
+		}
+
+		let latestTime = this.savedData[0].time;
+		if (
+			this.#latestMarker &&
+			this.#latestMarker.alwaysShow &&
+			this.#latestMarker.time > latestTime
+		) {
+			latestTime = this.#latestMarker.time;
+		}
+
+		const usedTime = earliestTime - latestTime;
 
 		// Left-over space not used up by the current points
 		let extraTime =
@@ -311,7 +361,7 @@ export class TimeLine {
 			(this.timeWindow === Infinity ? usedTime : this.timeWindow);
 
 		// Time offset anchors window at first point time
-		const timeOffset = -this.savedData[0].time + extraTime;
+		const timeOffset = -latestTime + extraTime;
 
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 
@@ -441,6 +491,7 @@ export class TimeLine {
 
 		// Clear old data
 		this.computedData = [];
+		this.#computedMarkers = [];
 
 		// Compute values for each point
 		for (const point of this.savedData) {
@@ -456,6 +507,16 @@ export class TimeLine {
 			};
 			this.computedData.push(computedPoint);
 		}
+
+		for (const marker of this.#markers) {
+			const computedMarker = {
+				...marker,
+				renderX:
+					this.computedPadding.left +
+					(marker.time + timeOffset) * timeMultiplier,
+			};
+			this.#computedMarkers.push(computedMarker);
+		}
 		this.handlePluginHooks("compute:after");
 	}
 
@@ -468,6 +529,7 @@ export class TimeLine {
 		this.ctx.strokeStyle = this.foregroundColour;
 		this.ctx.lineWidth = this.lineWidth;
 		this.ctx.setLineDash([]);
+		this.ctx.font = this.font;
 
 		// Clear canvas
 		this.ctx.fillStyle = this.backgroundColour;
@@ -500,6 +562,29 @@ export class TimeLine {
 
 			// Draw the path
 			this.ctx.stroke();
+		}
+
+		// Draw markers
+		this.ctx.setLineDash([5, 10]);
+		for (const marker of this.#computedMarkers) {
+			this.ctx.beginPath();
+			this.ctx.moveTo(marker.renderX, this.computedPadding.top);
+			this.ctx.lineTo(
+				marker.renderX,
+				this.computedPadding.top + this.heightInsidePadding,
+			);
+			this.ctx.stroke();
+
+			if (marker.label) {
+				this.ctx.setLineDash([]);
+				const textSize = this.ctx.measureText(marker.label);
+				this.ctx.strokeStyle = "transparent";
+				const textX = marker.renderX - textSize.width - 4;
+				const textY = this.padding.top + this.fontSize + 2;
+				this.ctx.fillRect(textX, textY, textSize.width, this.fontSize);
+				this.ctx.fillStyle = this.foregroundColour;
+				this.ctx.fillText(marker.label, textX, textY);
+			}
 		}
 
 		this.handlePluginHooks("draw:after");
