@@ -22,6 +22,13 @@ const chart = new TimeLine({
 		// You can use these built-in plugins though.
 		axisLabelPlugin(),
 	],
+	markers: [
+		{
+			time: Date.now() - 1000,
+			alwaysShow: true,
+			label: "Banana",
+		},
+	],
 });
 
 window.chart = chart;
