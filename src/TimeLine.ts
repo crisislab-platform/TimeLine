@@ -548,8 +548,9 @@ export class TimeLine {
 			// on-screen, and the label could still overlap the border. Oh well.
 			console.log(marker);
 			if (
-				marker.renderX < this.padding.left ||
-				marker.renderX > this.widthInsidePadding + this.padding.right
+				marker.renderX < this.computedPadding.left ||
+				marker.renderX >
+					this.widthInsidePadding + this.computedPadding.right
 			) {
 				continue;
 			}
@@ -586,7 +587,7 @@ export class TimeLine {
 					textX = marker.renderX + this.fontSize / 2;
 				}
 
-				const textY = this.padding.top + this.fontSize + 2;
+				const textY = this.computedPadding.top + this.fontSize + 2;
 				this.ctx.fillRect(textX, textY, textSize.width, this.fontSize);
 				this.ctx.fillStyle = colour;
 				this.ctx.fillText(marker.label, textX, textY);
@@ -597,9 +598,9 @@ export class TimeLine {
 		this.ctx.strokeStyle = this.foregroundColour;
 		this.ctx.strokeRect(
 			this.computedPadding.left,
-			this.computedPadding.top,
+			this.computedPadding.top - 1,
 			this.widthInsidePadding,
-			this.heightInsidePadding,
+			this.heightInsidePadding + 2,
 		);
 
 		this.handlePluginHooks("draw:after");
