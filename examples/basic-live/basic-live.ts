@@ -22,11 +22,19 @@ const chart = new TimeLine({
 		// You can use these built-in plugins though.
 		axisLabelPlugin(),
 	],
+	padding: {
+		top: 5,
+		left: 5,
+		bottom: 5,
+		right: 5,
+	},
 	markers: [
 		{
-			time: Date.now() - 1000,
-			alwaysShow: true,
+			time: Date.now() - 2000,
+			// alwaysShow: true,
 			label: "Banana",
+			labelSide: "right",
+			colour: "red",
 		},
 	],
 });

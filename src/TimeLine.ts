@@ -39,6 +39,12 @@ export interface TimeLineMarker {
 	time: number;
 	label?: string;
 	alwaysShow?: boolean;
+	// left by default
+	labelSide?: "left" | "right";
+	// dashed by default
+	lineStyle?: "solid" | "dashed" | "dotted";
+	// chart foreground (black) by default
+	colour?: string;
 }
 
 // TODO: Add option for padding inside the chart border
@@ -325,7 +331,7 @@ export class TimeLine {
 			this.#earliestMarker.alwaysShow &&
 			this.#earliestMarker.time < earliestTime
 		) {
-			earliestTime = this.#earliestMarker.time;
+			// earliestTime = this.#earliestMarker.time;
 		}
 
 		let latestTime = this.savedData[0].time;
@@ -334,7 +340,7 @@ export class TimeLine {
 			this.#latestMarker.alwaysShow &&
 			this.#latestMarker.time > latestTime
 		) {
-			latestTime = this.#latestMarker.time;
+			// latestTime = this.#latestMarker.time;
 		}
 
 		const usedTime = earliestTime - latestTime;
@@ -511,16 +517,11 @@ export class TimeLine {
 		this.ctx.fillStyle = this.backgroundColour;
 		this.ctx.fillRect(0, 0, this.width, this.height);
 
-		// Draw lines on sides
-		this.ctx.strokeRect(
-			this.computedPadding.left,
-			this.computedPadding.top,
-			this.widthInsidePadding,
-			this.heightInsidePadding,
-		);
-
 		// Only draw points if we have enough data
 		if (this.computedData.length >= 2) {
+			this.ctx.fillStyle = "transparent";
+			this.ctx.strokeStyle = this.foregroundColour;
+
 			// Begin the path
 			this.ctx.beginPath();
 
@@ -541,8 +542,29 @@ export class TimeLine {
 		}
 
 		// Draw markers
-		this.ctx.setLineDash([5, 10]);
 		for (const marker of this.#computedMarkers) {
+			// Stop the markers showing outside the border
+			// This has the downside of labels not showing until the marker is
+			// on-screen, and the label could still overlap the border. Oh well.
+			console.log(marker);
+			if (
+				marker.renderX < this.padding.left ||
+				marker.renderX > this.widthInsidePadding + this.padding.right
+			) {
+				continue;
+			}
+
+			const colour = marker.colour ?? this.foregroundColour;
+			this.ctx.strokeStyle = colour;
+
+			if (!marker.lineStyle || marker.lineStyle === "dashed") {
+				this.ctx.setLineDash([5, 5]);
+			} else if (marker.lineStyle === "dotted") {
+				this.ctx.setLineDash([1, 5]);
+			} else {
+				this.ctx.setLineDash([]);
+			}
+
 			this.ctx.beginPath();
 			this.ctx.moveTo(marker.renderX, this.computedPadding.top);
 			this.ctx.lineTo(
@@ -552,16 +574,33 @@ export class TimeLine {
 			this.ctx.stroke();
 
 			if (marker.label) {
+				const labelSide = marker.labelSide ?? "left";
+
 				this.ctx.setLineDash([]);
 				const textSize = this.ctx.measureText(marker.label);
 				this.ctx.strokeStyle = "transparent";
-				const textX = marker.renderX - textSize.width - 4;
+				let textX: number;
+				if (labelSide === "left") {
+					textX = marker.renderX - textSize.width - this.fontSize / 2;
+				} else {
+					textX = marker.renderX + this.fontSize / 2;
+				}
+
 				const textY = this.padding.top + this.fontSize + 2;
 				this.ctx.fillRect(textX, textY, textSize.width, this.fontSize);
-				this.ctx.fillStyle = this.foregroundColour;
+				this.ctx.fillStyle = colour;
 				this.ctx.fillText(marker.label, textX, textY);
 			}
 		}
+
+		// Draw lines on sides
+		this.ctx.strokeStyle = this.foregroundColour;
+		this.ctx.strokeRect(
+			this.computedPadding.left,
+			this.computedPadding.top,
+			this.widthInsidePadding,
+			this.heightInsidePadding,
+		);
 
 		this.handlePluginHooks("draw:after");
 	}
