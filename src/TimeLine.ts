@@ -81,7 +81,7 @@ export class TimeLine {
 	paused = false;
 	padding: TimeLineSides;
 	fontSize = 16;
-	font = `${this.fontSize}px monospace`;
+	font: string = `${this.fontSize}px monospace`;
 
 	markers: TimeLineMarker[] = [];
 	computedMarkers: (TimeLineMarker &
