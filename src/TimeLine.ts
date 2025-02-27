@@ -132,6 +132,12 @@ export class TimeLine {
 			}
 		}
 
+		if (options.markers) {
+			for (const marker of options.markers) {
+				this.addMarker(marker);
+			}
+		}
+
 		this.plugins =
 			(options.plugins?.filter(
 				(plugin) => !!plugin,
