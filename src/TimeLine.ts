@@ -320,16 +320,16 @@ export class TimeLine {
 		return this.canvas.height / window.devicePixelRatio;
 	}
 
-	addMarker(marker: TimeLineMarker) {
+	addMarker(marker: TimeLineMarker | Omit<TimeLineMarker, "orientation">) {
 		if ("value" in marker) {
 			// Horizontal
 			marker.orientation = "horizontal";
-		} else {
+		} else if ("time" in marker) {
 			// Vertical
 			marker.orientation = "vertical";
 		}
 
-		this.markers.push(marker);
+		this.markers.push(marker as TimeLineMarker);
 	}
 
 	/**
