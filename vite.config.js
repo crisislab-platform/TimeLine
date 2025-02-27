@@ -17,7 +17,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const buildSiteMode = process.env.BUILD_SITE_NOT_LIBRARY === "yes";
 console.info("Build site mode:", buildSiteMode);
 export default defineConfig({
-	plugins: [!buildSiteMode && dts()],
+	plugins: [!buildSiteMode && dts({ rollupTypes: true })],
 	optimizeDeps: {
 		// This makes the examples work
 		include: ["examples/**/*"],

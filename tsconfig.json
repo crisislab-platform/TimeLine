@@ -1,7 +1,8 @@
 {
 	"compilerOptions": {
 		"strict": true,
-		"target": "ESNext"
+		"target": "ESNext",
+		"noEmit": true
 	},
 	"exclude": ["examples/"]
 }
