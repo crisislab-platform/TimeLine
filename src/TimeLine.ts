@@ -376,7 +376,6 @@ export class TimeLine {
 		// After we've found the real values, fudge them a bit to add breathing room
 		if (timeMarkerOutOfBounds !== 0) {
 			const realUsedTime = latestTime - earliestTime;
-			console.log("realUsedTime ", realUsedTime);
 			const offset = realUsedTime * this.outOfBoundsMarkerPaddingPercent;
 			if (timeMarkerOutOfBounds === -1) {
 				earliestTime += timeMarkerOutOfBounds * offset;
@@ -386,7 +385,6 @@ export class TimeLine {
 		}
 
 		const usedTime = latestTime - earliestTime;
-		console.log("usedTime ", usedTime);
 
 		// Left-over space not used up by the current points
 		let extraTime =
@@ -398,7 +396,7 @@ export class TimeLine {
 			(this.timeWindow === Infinity ? usedTime : this.timeWindow);
 
 		// Time offset anchors window at first point time
-		const timeOffset = latestTime + extraTime;
+		const timeOffset = extraTime - earliestTime;
 
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 
@@ -641,7 +639,6 @@ export class TimeLine {
 			// Stop the markers showing outside the border
 			// This has the downside of labels not showing until the marker is
 			// on-screen, and the label could still overlap the border. Oh well.
-			// console.log(marker);
 			if (marker.orientation === "vertical") {
 				if (
 					marker.renderX < this.computedPadding.left ||
