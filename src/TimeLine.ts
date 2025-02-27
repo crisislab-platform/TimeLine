@@ -541,6 +541,8 @@ export class TimeLine {
 			 * Courtesy of Claude AI & Zade Viggers
 			 */
 
+			// FIXME: This is still broken when using live incomplete data with
+			// time markers, but extraTimeForData makes it a bit less cooked
 			const axisAlignedTime = firstPoint.time - extraTimeForData;
 
 			const yIntersectValue =
