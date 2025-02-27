@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Value Window</title>
+	</head>
+	<body>
+		<h1>Value window</h1>
+		<a href="../">← Back to examples</a>
+		<a
+			href="https://github.com/crisislab-platform/TimeLine/blob/main/examples/value-window/value-window.ts"
+		>
+			See code
+		</a>
+		<label for="overflow-behaviour">Overflow behaviour:</label>
+		<select id="overflow-behaviour">
+			<option value="clip" selected>clip</option>
+			<option value="scale">scale</option>
+		</select>
+		<input type="checkbox" id="enable-value-window" checked />
+		<label for="enable-value-window">Enable value window</label>
+		<div id="chart-container" height="250" width="500"></div>
+		<script type="module" src="value-window.ts"></script>
+	</body>
+</html>

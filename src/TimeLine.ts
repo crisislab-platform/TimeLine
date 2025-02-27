@@ -17,6 +17,11 @@ export interface TimeLineOptions {
 	container: HTMLElement;
 	data: TimeLineDataPoint[];
 	timeWindow?: number;
+	valueWindow?: {
+		min: number;
+		max: number;
+		overflowBehaviour: "clip" | "scale";
+	};
 	valueAxisLabel: string;
 	timeAxisLabel: string;
 	lineWidth?: number;
@@ -55,6 +60,12 @@ export class TimeLine {
 	paused = false;
 	padding: TimeLineSides;
 
+	valueWindow?: {
+		min: number;
+		max: number;
+		overflowBehaviour: "clip" | "scale";
+	};
+
 	helpfulInfo: TimeLineHelpfulInfo = {
 		cursor: {
 			x: -1,
@@ -82,6 +93,7 @@ export class TimeLine {
 			bottom: 0,
 			...options.padding,
 		};
+		this.valueWindow = options.valueWindow;
 
 		this.plugins =
 			(options.plugins?.filter(
@@ -302,19 +314,31 @@ export class TimeLine {
 		const timeOffset = -this.savedData[0].time + extraTime;
 
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
-		// Note to future self: Always use -Infinity, not Number.MIN_VALUE
-		let biggestValue = -Infinity;
-		let smallestValue = Infinity;
-		for (const point of this.savedData) {
-			if (point.value > biggestValue) biggestValue = point.value;
-			if (point.value < smallestValue) smallestValue = point.value;
+
+		let biggestValue;
+		let smallestValue;
+		if (this.valueWindow?.overflowBehaviour === "clip") {
+			biggestValue = this.valueWindow.max;
+			smallestValue = this.valueWindow.min;
+		} else {
+			// Note to future self: Always use -Infinity, not Number.MIN_VALUE
+			biggestValue = -Infinity;
+			smallestValue = Infinity;
+			for (const point of this.savedData) {
+				if (point.value > biggestValue) biggestValue = point.value;
+				if (point.value < smallestValue) smallestValue = point.value;
+			}
+			if (this.valueWindow?.overflowBehaviour === "scale") {
+				biggestValue = Math.max(biggestValue, this.valueWindow.max);
+				smallestValue = Math.min(smallestValue, this.valueWindow.min);
+			}
 		}
 
 		// Get the maximum gap
-		const maxValueGap = biggestValue - smallestValue;
+		const valueRange = biggestValue - smallestValue;
 
 		// Now divide the available pixels by that for the multiplier
-		const valueMultiplier = this.heightInsidePadding / maxValueGap;
+		const valueMultiplier = this.heightInsidePadding / valueRange;
 
 		// Y offset is very easy - just the inverse of the smallest number
 		// since we draw from the top
