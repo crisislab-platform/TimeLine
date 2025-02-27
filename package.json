@@ -2,7 +2,7 @@
 	"name": "@crisislab/timeline",
 	"description": "Time-series graphing library",
 	"type": "module",
-	"version": "0.11.4",
+	"version": "0.12.0",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "BUILD_SITE_NOT_LIBRARY=no vite build",
