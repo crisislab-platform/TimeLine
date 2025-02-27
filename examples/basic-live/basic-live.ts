@@ -22,36 +22,6 @@ const chart = new TimeLine({
 		// You can use these built-in plugins though.
 		axisLabelPlugin(),
 	],
-	padding: {
-		top: 5,
-		left: 5,
-		bottom: 5,
-		right: 5,
-	},
-	markers: [
-		{
-			time: Date.now() + 3000,
-			// alwaysShow: true,
-			label: "Banana",
-			labelSide: "before",
-			colour: "red",
-		},
-		{
-			time: Date.now() - 3000,
-			alwaysShow: true,
-			label: "Carrot",
-			labelSide: "after",
-			colour: "orange",
-			lineStyle: "dotted",
-		},
-		{
-			value: 10,
-			alwaysShow: true,
-			label: "Avocado",
-			colour: "rebeccapurple",
-			lineStyle: "solid",
-		},
-	],
 });
 
 window.chart = chart;
