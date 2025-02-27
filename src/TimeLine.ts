@@ -448,11 +448,11 @@ export class TimeLine {
 			// >= instead of > because we want the padding if it's on the edge
 			if (marker.value >= biggestValue) {
 				biggestValue = marker.value;
-				valueMarkerOutOfBoundsLow = true;
+				valueMarkerOutOfBoundsHigh = true;
 			}
 			if (marker.value <= smallestValue) {
 				smallestValue = marker.value;
-				valueMarkerOutOfBoundsHigh = true;
+				valueMarkerOutOfBoundsLow = true;
 			}
 		}
 

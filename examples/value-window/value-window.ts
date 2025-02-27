@@ -30,6 +30,7 @@ const chart = new TimeLine({
 	// Note that these aren't used by the chart itself, they're just used by plugins
 	timeAxisLabel: "Time",
 	valueAxisLabel: "Random numbers",
+	markers: [{ value: 0, label: "0", lineStyle: "dashed", colour: "orange" }],
 	plugins: [
 		// By default, the chart doesn't draw an time or y axis.
 		// You can use these built-in plugins though.
