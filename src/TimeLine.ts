@@ -78,8 +78,8 @@ export class TimeLine {
 	fontSize = 16;
 	font = `${this.fontSize}px monospace`;
 
-	#markers: TimeLineMarker[] = [];
-	#computedMarkers: (TimeLineMarker &
+	markers: TimeLineMarker[] = [];
+	computedMarkers: (TimeLineMarker &
 		(
 			| { renderX: number; orientation: "vertical" }
 			| { renderY: number; orientation: "horizontal" }
@@ -302,10 +302,6 @@ export class TimeLine {
 		return this.canvas.height / window.devicePixelRatio;
 	}
 
-	get markers(): TimeLineMarker[] {
-		return this.#markers;
-	}
-
 	addMarker(marker: TimeLineMarker) {
 		if ("value" in marker) {
 			// Horizontal
@@ -315,7 +311,7 @@ export class TimeLine {
 			marker.orientation = "vertical";
 		}
 
-		this.#markers.push(marker);
+		this.markers.push(marker);
 	}
 
 	/**
@@ -328,6 +324,13 @@ export class TimeLine {
 		valueOffset: number;
 		valueMultiplier: number;
 		extraTime: number;
+		extraTimeForData: number;
+		markerOutOfBounds: {
+			valueHigh: boolean;
+			valueLow: boolean;
+			timeHigh: boolean;
+			timeLow: boolean;
+		};
 	} {
 		// Avoid throwing errors dividing by zero
 		if (this.savedData.length < 2) {
@@ -337,15 +340,24 @@ export class TimeLine {
 				valueOffset: 0,
 				valueMultiplier: 1,
 				extraTime: 0,
+				extraTimeForData: 0,
+				markerOutOfBounds: {
+					valueHigh: false,
+					valueLow: false,
+					timeHigh: false,
+					timeLow: false,
+				},
 			};
 		}
 
 		let latestTime = this.savedData.at(-1)!.time;
 		let earliestTime = this.savedData[0].time;
+		const usedTimeForData = latestTime - earliestTime;
 
 		// See below for explanation
-		let timeMarkerOutOfBounds = 0;
-		for (const marker of this.#markers) {
+		let timeMarkerOutOfBoundsHigh = false;
+		let timeMarkerOutOfBoundsLow = false;
+		for (const marker of this.markers) {
 			if (!("time" in marker) || !marker.alwaysShow) {
 				continue;
 			}
@@ -353,30 +365,35 @@ export class TimeLine {
 			// >= instead of > because we want the padding if it's on the edge
 			if (marker.time >= latestTime) {
 				latestTime = marker.time;
-				timeMarkerOutOfBounds = 1;
+				timeMarkerOutOfBoundsHigh = true;
 			}
 			if (marker.time <= earliestTime) {
 				earliestTime = marker.time;
-				timeMarkerOutOfBounds = -1;
+				timeMarkerOutOfBoundsLow = false;
 			}
 		}
 
 		// After we've found the real values, fudge them a bit to add breathing room
-		if (timeMarkerOutOfBounds !== 0) {
+		if (timeMarkerOutOfBoundsHigh || timeMarkerOutOfBoundsLow) {
 			const realUsedTime = latestTime - earliestTime;
 			const offset = realUsedTime * this.outOfBoundsMarkerPaddingPercent;
-			if (timeMarkerOutOfBounds === -1) {
-				earliestTime += timeMarkerOutOfBounds * offset;
-			} else {
-				latestTime += timeMarkerOutOfBounds * offset;
+			if (timeMarkerOutOfBoundsLow) {
+				earliestTime -= offset;
+			}
+			if (timeMarkerOutOfBoundsHigh) {
+				latestTime += offset;
 			}
 		}
 
 		const usedTime = latestTime - earliestTime;
 
 		// Left-over space not used up by the current points
-		let extraTime =
+		const extraTime =
 			this.timeWindow === Infinity ? 0 : this.timeWindow - usedTime;
+		const extraTimeForData =
+			this.timeWindow === Infinity
+				? 0
+				: this.timeWindow - usedTimeForData;
 
 		// Time multiplier scales time window to available pixel width
 		const timeMultiplier =
@@ -396,8 +413,10 @@ export class TimeLine {
 		}
 
 		// See below for explanation
-		let valueMarkerOutOfBounds = 0;
-		for (const marker of this.#markers) {
+		let valueMarkerOutOfBoundsLow = false;
+		let valueMarkerOutOfBoundsHigh = false;
+
+		for (const marker of this.markers) {
 			if (!("value" in marker) || !marker.alwaysShow) {
 				continue;
 			}
@@ -405,22 +424,23 @@ export class TimeLine {
 			// >= instead of > because we want the padding if it's on the edge
 			if (marker.value >= biggestValue) {
 				biggestValue = marker.value;
-				valueMarkerOutOfBounds = 1;
+				valueMarkerOutOfBoundsLow = true;
 			}
 			if (marker.value <= smallestValue) {
 				smallestValue = marker.value;
-				valueMarkerOutOfBounds = -1;
+				valueMarkerOutOfBoundsHigh = true;
 			}
 		}
 
 		// After we've found the real values, fudge them a bit to add breathing room
-		if (valueMarkerOutOfBounds !== 0) {
+		if (valueMarkerOutOfBoundsHigh || valueMarkerOutOfBoundsLow) {
 			const realValueGap = biggestValue - smallestValue;
 			const offset = realValueGap * this.outOfBoundsMarkerPaddingPercent;
-			if (valueMarkerOutOfBounds === -1) {
-				smallestValue += valueMarkerOutOfBounds * offset;
-			} else {
-				biggestValue += valueMarkerOutOfBounds * offset;
+			if (valueMarkerOutOfBoundsLow) {
+				smallestValue -= offset;
+			}
+			if (valueMarkerOutOfBoundsHigh) {
+				biggestValue += offset;
 			}
 		}
 		// Get the maximum gap
@@ -439,6 +459,13 @@ export class TimeLine {
 			valueOffset,
 			valueMultiplier,
 			extraTime,
+			extraTimeForData,
+			markerOutOfBounds: {
+				valueHigh: valueMarkerOutOfBoundsHigh,
+				valueLow: valueMarkerOutOfBoundsLow,
+				timeHigh: timeMarkerOutOfBoundsHigh,
+				timeLow: timeMarkerOutOfBoundsLow,
+			},
 		};
 	}
 
@@ -492,6 +519,7 @@ export class TimeLine {
 			valueOffset,
 			valueMultiplier,
 			extraTime,
+			extraTimeForData,
 		} = this.getRenderOffsetsAndMultipliers();
 
 		// If we have data overflowing off the left side
@@ -513,7 +541,7 @@ export class TimeLine {
 			 * Courtesy of Claude AI & Zade Viggers
 			 */
 
-			const axisAlignedTime = firstPoint.time - extraTime;
+			const axisAlignedTime = firstPoint.time - extraTimeForData;
 
 			const yIntersectValue =
 				firstPoint.value +
@@ -530,7 +558,7 @@ export class TimeLine {
 
 		// Clear old data
 		this.computedData = [];
-		this.#computedMarkers = [];
+		this.computedMarkers = [];
 
 		// Compute values for each point
 		for (const point of this.savedData) {
@@ -547,7 +575,7 @@ export class TimeLine {
 			this.computedData.push(computedPoint);
 		}
 
-		for (const marker of this.#markers) {
+		for (const marker of this.markers) {
 			let computedMarker;
 			if (marker.orientation === "vertical") {
 				computedMarker = {
@@ -566,7 +594,7 @@ export class TimeLine {
 						(marker.value + valueOffset) * valueMultiplier,
 				};
 			}
-			this.#computedMarkers.push(computedMarker);
+			this.computedMarkers.push(computedMarker);
 		}
 		this.handlePluginHooks("compute:after");
 	}
@@ -611,7 +639,7 @@ export class TimeLine {
 		}
 
 		// Draw markers
-		for (const marker of this.#computedMarkers) {
+		for (const marker of this.computedMarkers) {
 			// Stop the markers showing outside the border
 			// This has the downside of labels not showing until the marker is
 			// on-screen, and the label could still overlap the border. Oh well.

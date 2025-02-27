@@ -7,7 +7,7 @@ import {
 	TimeLineDataPoint,
 } from "../../src/index";
 
-const timeWindow = 30 * 1000; // 30 seconds
+const timeWindow = 5 * 1000; // 30 seconds
 
 const data: TimeLineDataPoint[] = [];
 const chart = new TimeLine({
@@ -31,25 +31,32 @@ const chart = new TimeLine({
 	markers: [
 		{
 			time: Date.now() + 3000,
-			// alwaysShow: true,
+			// This is a little buggy
+			alwaysShow: true,
 			label: "Banana",
 			labelSide: "before",
 			colour: "red",
 		},
 		{
-			time: Date.now() - 3000,
-			alwaysShow: true,
+			time: Date.now() + 110,
 			label: "Carrot",
 			labelSide: "after",
 			colour: "orange",
 			lineStyle: "dotted",
+			alwaysShow: true,
 		},
 		{
 			value: 10,
-			alwaysShow: true,
 			label: "Avocado",
 			colour: "rebeccapurple",
 			lineStyle: "solid",
+		},
+		{
+			value: -50,
+			alwaysShow: true,
+			label: "Pear",
+			colour: "#6B8E23",
+			lineStyle: "dashed",
 		},
 	],
 });
