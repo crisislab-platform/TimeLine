@@ -40,17 +40,25 @@ export interface TimeLineHelpfulInfo {
 	};
 }
 
-export interface TimeLineMarker {
-	time: number;
+type TimeLineMarkerBase = {
 	label?: string;
 	alwaysShow?: boolean;
-	// left by default
-	labelSide?: "left" | "right";
+	// center by default
+	labelSide?: "before" | "after" | "center";
 	// dashed by default
 	lineStyle?: "solid" | "dashed" | "dotted";
 	// chart foreground (black) by default
 	colour?: string;
-}
+};
+export type TimeLineTimeMarker = TimeLineMarkerBase & {
+	orientation: "vertical";
+	time: number;
+};
+export type TimeLineValueMarker = TimeLineMarkerBase & {
+	orientation: "horizontal";
+	value: number;
+};
+export type TimeLineMarker = TimeLineTimeMarker | TimeLineValueMarker;
 
 // TODO: Add option for padding inside the chart border
 
@@ -75,10 +83,13 @@ export class TimeLine {
 	fontSize = 16;
 	font = `${this.fontSize}px monospace`;
 
-	#markers: TimeLineMarker[];
-	#earliestMarker?: TimeLineMarker;
-	#latestMarker?: TimeLineMarker;
-	#computedMarkers: (TimeLineMarker & { renderX: number })[] = [];
+	#markers: TimeLineMarker[] = [];
+	#computedMarkers: (TimeLineMarker &
+		(
+			| { renderX: number; orientation: "vertical" }
+			| { renderY: number; orientation: "horizontal" }
+		))[] = [];
+	outOfBoundsMarkerPaddingPercent = 0.02; // 2%
 
 	valueWindow?: {
 		min: number;
@@ -114,7 +125,12 @@ export class TimeLine {
 			...options.padding,
 		};
 		this.valueWindow = options.valueWindow;
-		this.#markers = options.markers ?? [];
+
+		if (options.markers) {
+			for (const marker of options.markers) {
+				this.addMarker(marker);
+			}
+		}
 
 		this.plugins =
 			(options.plugins?.filter(
@@ -303,16 +319,15 @@ export class TimeLine {
 	}
 
 	addMarker(marker: TimeLineMarker) {
-		this.#markers.push(marker);
-
-		if (!this.#earliestMarker || marker.time < this.#earliestMarker.time) {
-			this.#earliestMarker = marker;
-		} else if (
-			!this.#latestMarker ||
-			marker.time > this.#latestMarker.time
-		) {
-			this.#latestMarker = marker;
+		if ("value" in marker) {
+			// Horizontal
+			marker.orientation = "horizontal";
+		} else {
+			// Vertical
+			marker.orientation = "vertical";
 		}
+
+		this.#markers.push(marker);
 	}
 
 	/**
@@ -337,25 +352,41 @@ export class TimeLine {
 			};
 		}
 
-		let earliestTime = this.savedData.at(-1)!.time;
-		if (
-			this.#earliestMarker &&
-			this.#earliestMarker.alwaysShow &&
-			this.#earliestMarker.time < earliestTime
-		) {
-			// earliestTime = this.#earliestMarker.time;
+		let latestTime = this.savedData.at(-1)!.time;
+		let earliestTime = this.savedData[0].time;
+
+		// See below for explanation
+		let timeMarkerOutOfBounds = 0;
+		for (const marker of this.#markers) {
+			if (!("time" in marker) || !marker.alwaysShow) {
+				continue;
+			}
+
+			// >= instead of > because we want the padding if it's on the edge
+			if (marker.time >= latestTime) {
+				latestTime = marker.time;
+				timeMarkerOutOfBounds = 1;
+			}
+			if (marker.time <= earliestTime) {
+				earliestTime = marker.time;
+				timeMarkerOutOfBounds = -1;
+			}
 		}
 
-		let latestTime = this.savedData[0].time;
-		if (
-			this.#latestMarker &&
-			this.#latestMarker.alwaysShow &&
-			this.#latestMarker.time > latestTime
-		) {
-			// latestTime = this.#latestMarker.time;
+		// After we've found the real values, fudge them a bit to add breathing room
+		if (timeMarkerOutOfBounds !== 0) {
+			const realUsedTime = latestTime - earliestTime;
+			console.log("realUsedTime ", realUsedTime);
+			const offset = realUsedTime * this.outOfBoundsMarkerPaddingPercent;
+			if (timeMarkerOutOfBounds === -1) {
+				earliestTime += timeMarkerOutOfBounds * offset;
+			} else {
+				latestTime += timeMarkerOutOfBounds * offset;
+			}
 		}
 
-		const usedTime = earliestTime - latestTime;
+		const usedTime = latestTime - earliestTime;
+		console.log("usedTime ", usedTime);
 
 		// Left-over space not used up by the current points
 		let extraTime =
@@ -367,7 +398,7 @@ export class TimeLine {
 			(this.timeWindow === Infinity ? usedTime : this.timeWindow);
 
 		// Time offset anchors window at first point time
-		const timeOffset = -latestTime + extraTime;
+		const timeOffset = latestTime + extraTime;
 
 		// Y multiplier is simpler - need to find the difference between the minimum and maximum points
 
@@ -390,6 +421,34 @@ export class TimeLine {
 			}
 		}
 
+		// See below for explanation
+		let valueMarkerOutOfBounds = 0;
+		for (const marker of this.#markers) {
+			if (!("value" in marker) || !marker.alwaysShow) {
+				continue;
+			}
+
+			// >= instead of > because we want the padding if it's on the edge
+			if (marker.value >= biggestValue) {
+				biggestValue = marker.value;
+				valueMarkerOutOfBounds = 1;
+			}
+			if (marker.value <= smallestValue) {
+				smallestValue = marker.value;
+				valueMarkerOutOfBounds = -1;
+			}
+		}
+
+		// After we've found the real values, fudge them a bit to add breathing room
+		if (valueMarkerOutOfBounds !== 0) {
+			const realValueGap = biggestValue - smallestValue;
+			const offset = realValueGap * this.outOfBoundsMarkerPaddingPercent;
+			if (valueMarkerOutOfBounds === -1) {
+				smallestValue += valueMarkerOutOfBounds * offset;
+			} else {
+				biggestValue += valueMarkerOutOfBounds * offset;
+			}
+		}
 		// Get the maximum gap
 		const valueRange = biggestValue - smallestValue;
 
@@ -515,12 +574,24 @@ export class TimeLine {
 		}
 
 		for (const marker of this.#markers) {
-			const computedMarker = {
-				...marker,
-				renderX:
-					this.computedPadding.left +
-					(marker.time + timeOffset) * timeMultiplier,
-			};
+			let computedMarker;
+			if (marker.orientation === "vertical") {
+				computedMarker = {
+					...marker,
+					renderX:
+						this.computedPadding.left +
+						(marker.time + timeOffset) * timeMultiplier,
+				};
+			} else {
+				// Horizontal
+				computedMarker = {
+					...marker,
+					renderY:
+						this.computedPadding.top +
+						this.heightInsidePadding -
+						(marker.value + valueOffset) * valueMultiplier,
+				};
+			}
 			this.#computedMarkers.push(computedMarker);
 		}
 		this.handlePluginHooks("compute:after");
@@ -570,13 +641,24 @@ export class TimeLine {
 			// Stop the markers showing outside the border
 			// This has the downside of labels not showing until the marker is
 			// on-screen, and the label could still overlap the border. Oh well.
-			console.log(marker);
-			if (
-				marker.renderX < this.computedPadding.left ||
-				marker.renderX >
-					this.widthInsidePadding + this.computedPadding.right
-			) {
-				continue;
+			// console.log(marker);
+			if (marker.orientation === "vertical") {
+				if (
+					marker.renderX < this.computedPadding.left ||
+					marker.renderX >
+						this.widthInsidePadding + this.computedPadding.right
+				) {
+					continue;
+				}
+			} else {
+				// Horizontal
+				if (
+					marker.renderY < this.computedPadding.top ||
+					marker.renderY >
+						this.heightInsidePadding + this.computedPadding.bottom
+				) {
+					continue;
+				}
 			}
 
 			const colour = marker.colour ?? this.foregroundColour;
@@ -585,34 +667,80 @@ export class TimeLine {
 			if (!marker.lineStyle || marker.lineStyle === "dashed") {
 				this.ctx.setLineDash([5, 5]);
 			} else if (marker.lineStyle === "dotted") {
-				this.ctx.setLineDash([1, 5]);
+				// Make dots 2x2
+				this.ctx.setLineDash([2, 5]);
+				this.ctx.lineWidth = 2;
+				// Center them on correct position.
+				// This makes them move 'smoothly'
+				if (marker.orientation === "vertical") {
+					marker.renderX -= 1;
+				} else {
+					marker.renderY -= 1;
+				}
 			} else {
 				this.ctx.setLineDash([]);
 			}
 
 			this.ctx.beginPath();
-			this.ctx.moveTo(marker.renderX, this.computedPadding.top);
-			this.ctx.lineTo(
-				marker.renderX,
-				this.computedPadding.top + this.heightInsidePadding,
-			);
+			if (marker.orientation === "vertical") {
+				this.ctx.moveTo(marker.renderX, this.computedPadding.top);
+				this.ctx.lineTo(
+					marker.renderX,
+					this.computedPadding.top + this.heightInsidePadding,
+				);
+			} else {
+				// Horizontal
+				this.ctx.moveTo(this.computedPadding.left, marker.renderY);
+				this.ctx.lineTo(
+					this.computedPadding.left + this.widthInsidePadding,
+					marker.renderY,
+				);
+			}
 			this.ctx.stroke();
+			this.ctx.lineWidth = 1;
 
 			if (marker.label) {
-				const labelSide = marker.labelSide ?? "left";
+				const labelSide = marker.labelSide ?? "center";
 
 				this.ctx.setLineDash([]);
 				const textSize = this.ctx.measureText(marker.label);
 				this.ctx.strokeStyle = "transparent";
 				let textX: number;
-				if (labelSide === "left") {
-					textX = marker.renderX - textSize.width - this.fontSize / 2;
+				let textY: number;
+				if (marker.orientation === "vertical") {
+					textY = this.computedPadding.top + this.fontSize + 2;
+					if (labelSide === "before") {
+						textX =
+							marker.renderX - textSize.width - this.fontSize / 2;
+					} else if (labelSide === "after") {
+						textX = marker.renderX + this.fontSize / 2;
+					} else {
+						// Center
+						textX = marker.renderX - textSize.width / 2;
+					}
 				} else {
-					textX = marker.renderX + this.fontSize / 2;
+					// Horizontal
+					textX = this.computedPadding.left + this.fontSize / 2;
+
+					if (labelSide === "before") {
+						textY = marker.renderY - this.fontSize - 2;
+					} else if (labelSide === "after") {
+						textY = marker.renderY + this.fontSize + 2;
+					} else {
+						// center
+						textY = marker.renderY + this.fontSize / 2 - 2;
+					}
 				}
 
-				const textY = this.computedPadding.top + this.fontSize + 2;
-				this.ctx.fillRect(textX, textY, textSize.width, this.fontSize);
+				// Background for text
+				this.ctx.fillStyle = this.backgroundColour;
+				this.ctx.fillRect(
+					textX,
+					// Text draws from the bottom left, but rects are from top left
+					textY - this.fontSize,
+					textSize.width,
+					this.fontSize,
+				);
 				this.ctx.fillStyle = colour;
 				this.ctx.fillText(marker.label, textX, textY);
 			}

@@ -30,11 +30,26 @@ const chart = new TimeLine({
 	},
 	markers: [
 		{
-			time: Date.now() - 2000,
+			time: Date.now() + 3000,
 			// alwaysShow: true,
 			label: "Banana",
-			labelSide: "right",
+			labelSide: "before",
 			colour: "red",
+		},
+		{
+			time: Date.now() - 3000,
+			alwaysShow: true,
+			label: "Carrot",
+			labelSide: "after",
+			colour: "orange",
+			lineStyle: "dotted",
+		},
+		{
+			value: 10,
+			alwaysShow: true,
+			label: "Avocado",
+			colour: "rebeccapurple",
+			lineStyle: "solid",
 		},
 	],
 });
