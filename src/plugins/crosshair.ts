@@ -16,7 +16,7 @@ export const pointerCrosshairPlugin = (): TimeLinePlugin => ({
 
 			// Horizontal line
 			if (
-				chart.helpfulInfo.cursor.chartX > chart.padding.top &&
+				chart.helpfulInfo.cursor.chartY > chart.padding.top &&
 				chart.helpfulInfo.cursor.chartY <
 					chart.height - chart.padding.bottom
 			) {
